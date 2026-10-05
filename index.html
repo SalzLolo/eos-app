@@ -1,0 +1,1730 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EOS – Einlass und Abschluss</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eceef2;--surface:#ffffff;--soft:#e2e6ee;--ink:#161a22;--muted:#586072;--line:#c6ccd9;
+  --accent:#f0b323;--accent-ink:#1b1500;--ok:#17734a;--bad:#b3261e;--okbg:#dff3e8;--badbg:#fbe3e0;
+  --disp:'Archivo','Arial Narrow',system-ui,sans-serif;
+  --body:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141922;--surface:#1c2230;--soft:#262e41;--ink:#eef1f6;--muted:#9ba5b9;--line:#2e3649;
+    --accent:#f5c242;--accent-ink:#1b1500;--ok:#4cc38a;--bad:#ff8174;--okbg:#17382a;--badbg:#4a201c;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141922;--surface:#1c2230;--soft:#262e41;--ink:#eef1f6;--muted:#9ba5b9;--line:#2e3649;
+  --accent:#f5c242;--accent-ink:#1b1500;--ok:#4cc38a;--bad:#ff8174;--okbg:#17382a;--badbg:#4a201c;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--body);-webkit-text-size-adjust:100%}
+main{max-width:720px;margin:0 auto;padding:14px 14px 120px}
+h1{font-family:var(--disp);font-weight:800;font-size:1.6rem;margin:6px 0 12px;letter-spacing:-.01em}
+h2{font-family:var(--disp);font-weight:600;font-size:1.1rem;margin:0 0 10px}
+p{margin:0 0 10px}
+.hint{color:var(--muted);font-size:.92rem}
+button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+/* Tab bar */
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;min-width:0;font-size:.85rem;min-height:58px;background:none;border:0;border-top:4px solid transparent;font-weight:700;color:var(--muted);position:relative}
+nav button[aria-current="page"]{color:var(--ink);border-top-color:var(--accent)}
+.badge{position:absolute;top:6px;right:calc(50% - 34px);background:var(--bad);color:#fff;border-radius:999px;font-size:.75rem;min-width:20px;padding:0 6px;line-height:20px}
+.badge[hidden]{display:none}
+
+/* Hero counter */
+.hero{display:flex;align-items:baseline;gap:12px;margin:2px 0 6px}
+.big{font-family:var(--disp);font-weight:800;font-size:4.4rem;line-height:1;letter-spacing:-.03em}
+.bigl{color:var(--muted)}
+.sub{color:var(--muted);margin:0 0 12px}
+.sub b{color:var(--ink)}
+
+/* Segmented controls */
+.seg{display:flex;gap:6px;margin:0 0 10px;background:var(--soft);padding:4px;border-radius:12px}
+.seg button{flex:1;min-height:48px;border:0;border-radius:9px;background:transparent;font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seglabel{font-size:.9rem;color:var(--muted);margin:0 0 4px 2px}
+
+/* Category buttons */
+.cats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:6px 0 18px}
+@media (min-width:640px){.cats{grid-template-columns:repeat(3,1fr)}}
+.cat{position:relative;text-align:left;min-height:88px;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);display:flex;flex-direction:column;justify-content:space-between;transition:transform .08s}
+.cat:active{transform:scale(.97);background:var(--soft)}
+.cat.free{border-style:dashed}
+.cn{font-weight:700;font-size:1.05rem;line-height:1.15;padding-right:46px}
+.cp{color:var(--muted);font-size:.9rem;margin-top:8px}
+.cc{position:absolute;top:10px;right:10px;min-width:38px;text-align:center;padding:1px 9px;border-radius:999px;font-family:var(--disp);font-weight:800;font-size:1.2rem;background:var(--soft)}
+.cc.on{background:var(--accent);color:var(--accent-ink)}
+
+/* Cards, fields */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 14px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f{display:flex;flex-direction:column;gap:4px;font-size:.92rem;color:var(--muted)}
+input[type=text],input:not([type]),input[type=date],select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;width:100%}
+input[inputmode]{font-size:1.1rem}
+.chk{display:flex;gap:6px;align-items:center;color:var(--ink);font-size:.95rem}
+.chk input{width:20px;height:20px}
+
+/* Buttons */
+.primary,.ghost,.danger{min-height:48px;padding:0 18px;border-radius:12px;font-weight:700;border:2px solid transparent}
+.primary{background:var(--accent);color:var(--accent-ink)}
+.ghost{background:transparent;border-color:var(--line)}
+.danger{background:transparent;border-color:var(--bad);color:var(--bad)}
+.btns{display:flex;gap:10px;margin-top:12px}
+.btns>*{flex:1}
+
+/* Log */
+.log{list-style:none;margin:0;padding:0}
+.log li{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.log li:last-child{border-bottom:0}
+.log .t{color:var(--muted);width:44px;flex:none}
+.log .d{flex:1}
+.log .voided .d{text-decoration:line-through;color:var(--muted)}
+.log button{min-height:38px;padding:0 12px;font-size:.9rem}
+.empty{color:var(--muted);padding:6px 0}
+
+/* Comparison rows */
+.cmp{border-radius:10px;padding:10px 12px;margin:0 0 8px;background:var(--soft);display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center}
+.cmp .cl{font-weight:700}
+.cmp .cl small{display:block;font-weight:400;color:var(--muted)}
+.cmp .cn2{display:flex;gap:14px;grid-column:1;color:var(--muted);font-size:.95rem}
+.cmp .cn2 b{color:var(--ink);font-variant-numeric:tabular-nums}
+.cmp .cs{grid-column:2;grid-row:1 / span 2;font-weight:700;text-align:right}
+.cmp.ok{background:var(--okbg)}.cmp.ok .cs{color:var(--ok)}
+.cmp.bad{background:var(--badbg)}.cmp.bad .cs{color:var(--bad)}
+.cmp.open .cs{color:var(--muted);font-weight:400}
+.cmp.info{grid-template-columns:1fr}
+.cmp.info .cn2{grid-column:1;color:var(--ink)}
+.status{border-radius:12px;padding:12px 14px;margin:0 0 14px;font-weight:700;background:var(--soft)}
+.status.ok{background:var(--okbg);color:var(--ok)}
+.status.bad{background:var(--badbg);color:var(--bad)}
+
+/* Formular-Übertrag */
+.fsec{margin:0 0 16px}
+.fsec h3{font-family:var(--disp);font-weight:600;font-size:1rem;margin:0 0 4px}
+.fr{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line)}
+.fr:last-child{border-bottom:0}
+.fr span:first-child{color:var(--muted)}
+.fr b{font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+
+/* Warenkorb */
+main.hasbar{padding-bottom:230px}
+.cart ul{list-style:none;margin:0;padding:0}
+.cart li{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px 10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.cart li:last-child{border-bottom:0}
+.cart .cq{font-family:var(--disp);font-weight:800;font-size:1.15rem;min-width:34px}
+.cart .cname{font-weight:700;overflow-wrap:anywhere}
+.cart .cname small{display:block;font-weight:400;color:var(--muted)}
+.cart .cam{font-variant-numeric:tabular-nums;font-weight:700}
+.cart .cbtn{display:flex;gap:6px}
+.cart .cbtn button{min-height:44px;min-width:44px;padding:0 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);font-weight:800;font-size:1.1rem}
+#cartbar{position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom,0px));z-index:4;background:var(--surface);border-top:2px solid var(--accent);box-shadow:0 -6px 18px rgba(0,0,0,.12)}
+#cartbar[hidden]{display:none}
+#cartbar .in{max-width:720px;margin:0 auto;padding:10px 14px 12px}
+#cartbar .top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+#cartbar .sum{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#cartbar .total{font-family:var(--disp);font-weight:800;font-size:2rem;line-height:1.1;white-space:nowrap}
+#cartbar .btns{margin-top:8px}
+#cartbar .btns .ghost{flex:0 0 auto}
+.dtl summary{cursor:pointer;color:var(--muted);margin:0 0 8px}
+
+/* Gästeliste */
+.gl{list-style:none;margin:0;padding:0}
+.g{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 8px;display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center}
+.g .gn{font-weight:700;font-size:1.08rem;overflow-wrap:anywhere}
+.g .gm{color:var(--muted);font-size:.9rem}
+.g .gs{font-family:var(--disp);font-weight:800;font-size:1.3rem;white-space:nowrap}
+.g .gb{grid-column:1 / -1;display:flex;gap:8px}
+.g .gb .primary{flex:1}
+.g .gb .ghost{min-width:64px;padding:0 12px}
+.g.done{background:var(--okbg);border-color:transparent}
+.g.done .gs{color:var(--ok)}
+textarea{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-height:120px}
+
+/* Setup rows */
+.crow{display:grid;grid-template-columns:1fr 84px;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.crow:last-of-type{border-bottom:0}
+.crow .row2{grid-column:1 / -1;display:flex;gap:10px;align-items:center}
+.crow select{flex:1}
+.crow .ghost{min-height:42px;padding:0 12px}
+
+/* Sheet + toast */
+#sheet{position:fixed;inset:0;background:rgba(10,12,18,.55);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+#sheet[hidden]{display:none}
+.sheet{background:var(--surface);width:100%;max-width:720px;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.err{color:var(--bad);font-weight:700;min-height:1.4em;margin:8px 0 0}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(80px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;z-index:20}
+#toast[hidden]{display:none}
+pre{white-space:pre-wrap;word-break:break-word;font:.85rem/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0 0}
+details summary{cursor:pointer;color:var(--muted);margin-top:10px}
+@media (prefers-reduced-motion:reduce){.cat{transition:none}}
+/* v2 Ergänzungen */
+input[type=password]{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;width:100%}
+.topbar{display:flex;gap:10px;align-items:flex-end;margin:0 0 12px}
+.evsel{flex:1;display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);min-width:0}
+.rolebtn{min-height:46px;padding:0 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);font-weight:700;white-space:nowrap}
+.note{background:var(--soft);border-radius:10px;padding:10px 12px;color:var(--muted);margin:0 0 12px}
+.sheet{max-height:92vh;overflow:auto}
+.sl{list-style:none;margin:10px 0 0;padding:0;max-height:46vh;overflow:auto}
+.sl li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.sl .sn{flex:1;min-width:0}
+.sl .sn b{display:block;overflow-wrap:anywhere}
+.sl .sn small{color:var(--muted)}
+.sl button{min-height:46px;padding:0 14px}
+button[disabled]{opacity:.5;cursor:not-allowed}
+.crow .row2{flex-wrap:wrap}
+.crow select{flex:1;min-width:130px}
+.trow{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);align-items:end}
+.trow:last-of-type{border-bottom:0}
+.rolegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.rolegrid button{min-height:48px;padding:0 14px;border-radius:12px;font-weight:700;border:2px solid transparent}
+.rolegrid .primary{background:var(--accent);color:var(--accent-ink)}
+.rolegrid .ghost{background:transparent;border-color:var(--line)}
+.fgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.card h3{font-family:var(--disp);font-weight:600;font-size:1rem;margin:14px 0 6px}
+.prow{display:grid;grid-template-columns:1fr 120px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.prow:last-of-type{border-bottom:0}
+.trow3{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;padding:8px 0;border-bottom:1px solid var(--line)}
+.trow3 .ghost{grid-column:1 / -1}
+.trow2{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.crow{grid-template-columns:1fr}
+.cat[disabled]{opacity:.55}
+input[type=time]{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;width:100%}
+.evrow{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.evbtn{display:flex;gap:8px;flex:none}
+.evbtn button{min-height:44px;padding:0 14px}
+.catbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 12px 2px;margin:0 0 14px}
+.catbox>summary,.grp>summary{font-weight:700;color:var(--ink);min-height:48px;display:flex;align-items:center;margin:0}
+.catbox[open]>summary{margin-bottom:6px}
+.grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px 4px;margin:0 0 10px}
+.grp[open]>summary{margin-bottom:6px}
+.card details>h3,#rangeOut h3{margin-top:14px}
+/* v5: Layout-Korrekturen und neue Bausteine */
+input,select,textarea{box-sizing:border-box;max-width:100%;min-width:0}
+.fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fgrid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.f{min-width:0}
+details textarea{display:block}
+.prow2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px;align-items:end;padding:10px 0;border-bottom:1px solid var(--line)}
+.prow2 .chk{min-height:46px}
+.sec>summary{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:48px;cursor:pointer;font-family:var(--disp);font-weight:600;font-size:1.1rem;color:var(--ink);margin:0}
+.sec[open]>summary{margin-bottom:10px}
+.sst{font-family:var(--body);font-size:.9rem;font-weight:700;text-align:right}
+.sst.ok{color:var(--ok)}.sst.bad{color:var(--bad)}.sst.open{color:var(--muted)}
+.note.closedbar{border-left:5px solid var(--accent);color:var(--ink);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.note.closedbar .ghost{min-height:44px;padding:0 14px}
+.lrow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px;align-items:end;padding:10px 0;border-bottom:1px solid var(--line)}
+.lrow .hint{margin:0}
+/* v6: Verbindung und Anmeldung */
+input[type=email]{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;width:100%;box-sizing:border-box}
+.statline{font-size:.85rem;color:var(--muted);margin:-4px 0 10px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:baseline}
+.dot.green{background:var(--ok)}.dot.amber{background:var(--accent)}.dot.grey{background:var(--muted)}
+.link{background:none;border:0;padding:0;color:inherit;text-decoration:underline;font:inherit;cursor:pointer}
+.link.bad{color:var(--bad);font-weight:700}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div id="cartbar" hidden></div>
+<div id="sheet" hidden></div>
+<div id="toast" hidden></div>
+<nav aria-label="Bereiche"></nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+'use strict';
+const PRICE_JACKE=2, PRICE_TASCHE=5;
+const ROLES={kasse:'Kasse',gard:'Garderobe',prod:'Produktion',admin:'Admin'};
+const TABS={kasse:['einlass','gl'],gard:['gard'],prod:['einlass','gl','gard','ab','ev'],admin:['einlass','gl','gard','ab','ev']};
+const TAB_LABEL={einlass:'Einlass',gl:'Liste',gard:'Garderobe',ab:'Abschluss',ev:'Anlass'};
+const NOTEN=[{k:'n200',d:200,row:20},{k:'n100',d:100,row:21},{k:'n50',d:50,row:22,stock:true},{k:'n20',d:20,row:23,stock:true},{k:'n10',d:10,row:24,stock:true}];
+const ROLLEN=[{k:'r5',short:'5.–',val:125,row:25},{k:'r2',short:'2.–',val:100,row:26},{k:'r1',short:'1.–',val:50,row:27},{k:'r05',short:'–.50',val:25,row:28}];
+const TERM_NRS=[]; for(let i=48;i<=61;i++) TERM_NRS.push(i);
+
+/* ---------- Helfer ---------- */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+function uuid(){
+  const b=new Uint8Array(16); (window.crypto||window.msCrypto).getRandomValues(b); b[6]=(b[6]&0x0f)|0x40; b[8]=(b[8]&0x3f)|0x80;
+  const h=Array.prototype.map.call(b,x=>('0'+x.toString(16)).slice(-2));
+  return h.slice(0,4).join('')+'-'+h.slice(4,6).join('')+'-'+h.slice(6,8).join('')+'-'+h.slice(8,10).join('')+'-'+h.slice(10).join('');
+}
+const num=v=>{ if(v===''||v==null) return null; const n=parseFloat(String(v).replace(',','.')); return isNaN(n)?null:n; };
+const round2=n=>Math.round(n*100)/100;
+const chf=n=>n.toLocaleString('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const chfs=n=>Number.isInteger(n)?String(n):chf(n);
+const $=s=>document.querySelector(s);
+const today=()=>new Date().toISOString().slice(0,10);
+const dmy=iso=>{ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||''); return m?m[3]+'.'+m[2]+'.'+m[1]:(iso||''); };
+const norm=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+/* ---------- Konfiguration ---------- */
+// Entweder hier eintragen oder beim ersten Start in der App eingeben.
+// Es wird nur der "anon public"-Schlüssel gebraucht, niemals der "service_role"-Schlüssel.
+const CONFIG = { url: 'https://dfnbnffhcxszflrzjjld.supabase.co', anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmbmJuZmZoY3hzemZscnpqamxkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExODUyMjUsImV4cCI6MjEwNjc2MTIyNX0.aMQkeP_A4gR668Fa5WOMaMj8T6LQNXezEhq7CL_BsFQ' };
+const CFG_KEY = 'eos-config';
+function cfg(){
+  let c = {};
+  try { c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}') || {}; } catch(e) {}
+  return { url: CONFIG.url || c.url || '', anonKey: CONFIG.anonKey || c.anonKey || '' };
+}
+const DBROLE = { kasse: 'Kasse', garderobe: 'Garderobe', produktion: 'Produktion', admin: 'Admin' };
+const ROLE_FROM_DB = { kasse: 'kasse', garderobe: 'gard', produktion: 'prod', admin: 'admin' };
+
+/* ---------- Zustand ---------- */
+let sb = null, me = null, profile = null;
+let boot = 'init';            // init | config | login | waiting | ready | error
+let bootMsg = '';
+let role = null, tab = 'einlass';
+const isProd = () => role === 'prod' || role === 'admin';
+const isAdmin = () => role === 'admin';
+const DEVICE = (function(){
+  try { let d = localStorage.getItem('eos-device'); if (!d) { d = 'dev-' + uuid().slice(0, 8); localStorage.setItem('eos-device', d); } return d; }
+  catch(e) { return 'dev'; }
+})();
+
+// Rohdaten vom Server (T) und die daraus abgeleitete Sicht fuer die Oberflaeche (S, E)
+const T = { cats: [], members: [], events: [], totals: {}, prices: [], lists: [], guests: [], terms: [], coat: null, cash: [], tx: [], lines: [], profiles: [] };
+const S = { cats: [], members: [], events: [] };
+let curId = null;
+let EV = null, evDirty = true;
+const cartMap = {};
+let netOk = true, rtState = 'off', lastFull = 0, lastEdit = 0;
+let outbox = [];
+try { outbox = JSON.parse(localStorage.getItem('eos-outbox') || '[]') || []; } catch(e) { outbox = []; }
+
+function syncS(){
+  S.cats = T.cats.map(c => ({ id: c.id, name: c.name, kind: c.kind, list: c.list_source === 'members' ? 'members' : '', active: c.active,
+                              reduced: c.reduced_level || undefined, voucher: c.is_voucher || undefined, sort: c.sort }));
+  S.members = T.members.filter(m => m.active).map(m => ({ id: m.id, name: m.name }));
+  S.events = T.events.map(e => ({ id: e.id, name: e.name, date: e.event_date, closed: e.status === 'closed', nb: (T.totals[e.id] || {}).tx_count || 0 }));
+}
+function mark(){ evDirty = true; syncS(); scheduleRender(); }
+function E(){ if (evDirty || !EV) { EV = buildEvent(); evDirty = false; } return EV; }
+
+/* Warenkorb: bleibt auf dem Geraet (pro Anlass) */
+function cartFor(id){
+  if (!cartMap[id]) { try { cartMap[id] = JSON.parse(localStorage.getItem('eos-cart-' + id) || '[]') || []; } catch(e) { cartMap[id] = []; } }
+  return cartMap[id];
+}
+function save(){ try { if (EV && EV.id) localStorage.setItem('eos-cart-' + EV.id, JSON.stringify(cartMap[EV.id] || [])); } catch(e) {} }
+const cartLen = id => cartFor(id).length;
+
+/* ---------- Abgeleitete Sicht eines Anlasses ---------- */
+const nz = v => (v == null || Number(v) === 0) ? '' : String(Number(v));
+const numStr = v => v == null ? '' : String(Number(v));
+const CASHCOL = { m: 'coins_chf', r5: 'roll_5', r2: 'roll_2', r1: 'roll_1', r05: 'roll_05', n200: 'note_200', n100: 'note_100', n50: 'note_50', n20: 'note_20', n10: 'note_10' };
+const COATCOL = { jFirst: 'jackets_first', jLast: 'jackets_last', jManual: 'jackets_manual', jFree: 'jackets_free',
+                  tFirst: 'bags_first', tLast: 'bags_last', tManual: 'bags_manual', tFree: 'bags_free' };
+function catSort(id){ const c = T.cats.find(x => x.id === id); return c ? c.sort : 999; }
+function priceRows(){ return T.prices.slice().sort((a, b) => catSort(a.category_id) - catSort(b.category_id)); }
+function termRows(){ return T.terms.slice().sort((a, b) => a.terminal_nr - b.terminal_nr); }
+function listRows(){ return T.lists.slice().sort((a, b) => (Number(b.is_default) - Number(a.is_default)) || String(a.created_at).localeCompare(String(b.created_at))); }
+
+function emptyEvent(){
+  const e = { id: null, none: true, name: '', date: today(), closed: true, closedAt: null, entries: [], guests: [], lists: [], plist: [], terms: [],
+              ab: {}, gard: {} };
+  e.cart = [];
+  return e;
+}
+function buildEvent(){
+  const ev = T.events.find(x => x.id === curId);
+  if (!ev) return emptyEvent();
+  const e = { id: ev.id, none: false, name: ev.name, date: ev.event_date, closed: ev.status === 'closed', closedAt: ev.closed_at ? Date.parse(ev.closed_at) : null };
+  e.lists = listRows().map(l => ({ id: l.id, name: l.name, price: l.price == null ? '' : numStr(l.price), fixed: !!l.is_default }));
+  e.guests = T.guests.map(g => ({ id: g.id, name: g.name, n: g.party_size, via: g.via || '', list: g.list_id }));
+  e.plist = priceRows().map(r => ({ cat: r.category_id, price: r.price == null ? '' : numStr(r.price), on: r.active }));
+  e.terms = termRows().map(t => ({ nr: String(t.terminal_nr), use: t.used_at, amt: t.daily_close == null ? '' : numStr(t.daily_close) }));
+  e.ab = { gutscheine: ev.vouchers_collected == null ? '' : String(ev.vouchers_collected), vvkScan: ev.vvk_scanned == null ? '' : String(ev.vvk_scanned) };
+  e.gard = {};
+  Object.keys(COATCOL).forEach(k => { const v = T.coat ? T.coat[COATCOL[k]] : null; e.gard[k] = v == null ? '' : String(v); });
+  [['AK', e.ab], ['Garderobe', e.gard]].forEach(([reg, target]) => {
+    [['stock', 's'], ['end', 'e']].forEach(([ph, p]) => {
+      const row = T.cash.find(r => r.register === reg && r.phase === ph);
+      if (row) {
+        target[p + '_row'] = true;
+        Object.keys(CASHCOL).forEach(k => { target[p + '_' + k] = nz(row[CASHCOL[k]]); });
+      }
+    });
+  });
+  e.entries = buildEntries();
+  Object.defineProperty(e, 'cart', { get(){ return cartFor(ev.id); }, set(v){ cartMap[ev.id] = v; }, enumerable: true });
+  return e;
+}
+function buildEntries(){
+  const txById = {}, stornoed = {};
+  T.tx.forEach(t => { txById[t.id] = t; if (t.kind === 'storno') stornoed[t.reverses_id] = true; });
+  const out = [];
+  T.lines.forEach(l => {
+    const t = txById[l.tx_id]; if (!t) return;
+    const amt = Number(l.amount);
+    out.push({ id: l.id, tx: l.tx_id, ts: Date.parse(t.created_at), cat: l.category_id || ('L:' + l.list_id), name: l.label, qty: l.qty, amount: amt,
+               pay: amt !== 0 ? t.pay_method : null, guest: l.guest_id || l.member_id || undefined, who: l.who || undefined,
+               voided: t.kind === 'sale' && !!stornoed[t.id], stornoOf: t.kind === 'storno' ? t.reverses_id : undefined });
+  });
+  // Buchungen, die noch auf dem Geraet warten (kein Netz oder noch nicht bestaetigt)
+  const known = new Set(T.tx.map(t => t.id));
+  outbox.filter(o => o.event === curId && !o.failed && !known.has(o.id)).forEach(o => {
+    if (o.kind === 'checkout') {
+      (o.view || []).forEach(v => out.push({ id: o.id + ':' + out.length, tx: o.id, ts: o.ts, cat: v.cat, name: v.name, qty: v.qty, amount: v.amount,
+                                            pay: v.amount !== 0 ? o.pay : null, guest: v.guest, who: v.who, voided: false, pending: true }));
+    }
+  });
+  outbox.filter(o => o.event === curId && !o.failed && o.kind === 'storno' && !known.has(o.id)).forEach(o => {
+    out.filter(x => x.tx === o.original && !x.stornoOf).forEach(x => {
+      x.voided = true;
+      out.push({ id: o.id + ':' + out.length, tx: o.id, ts: o.ts, cat: x.cat, name: x.name, qty: -x.qty, amount: -x.amount, pay: x.pay,
+                 guest: x.guest, who: x.who, voided: false, stornoOf: x.id, pending: true });
+    });
+  });
+  out.sort((a, b) => (a.ts - b.ts) || String(a.id).localeCompare(String(b.id)));
+  return out;
+}
+
+/* ---------- Anzeige-Steuerung ---------- */
+let renderTimer = null, pendingRender = false;
+function typing(){
+  const a = document.activeElement;
+  return !!(a && a.closest && a.closest('#app') && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName) && a.type !== 'checkbox' && a.type !== 'button');
+}
+function scheduleRender(){
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(() => {
+    if (boot !== 'ready') { render(); return; }
+    if (typing()) { pendingRender = true; try { recompute(); } catch(e) {} updateStat(); return; }
+    render(true);
+  }, 60);
+}
+document.addEventListener('focusout', () => { setTimeout(() => { if (pendingRender && !typing() && boot === 'ready') { pendingRender = false; render(true); } }, 80); });
+
+function statHtml(){
+  const failed = outbox.filter(o => o.failed).length, wait = outbox.filter(o => !o.failed).length;
+  const conn = !netOk ? '<span class="dot amber"></span>Kein Netz' : (rtState === 'live' ? '<span class="dot green"></span>Live' : '<span class="dot grey"></span>Verbunden (ohne Live-Abgleich)');
+  let h = conn;
+  if (wait) h += ' · <button class="link" data-act="outbox">' + wait + (wait === 1 ? ' Buchung wartet' : ' Buchungen warten') + ' auf Senden</button>';
+  if (failed) h += ' · <button class="link bad" data-act="outbox">' + failed + ' abgelehnt</button>';
+  return h;
+}
+function updateStat(){ const el = $('#stat'); if (el) el.innerHTML = statHtml(); }
+
+/* ---------- Server: laden ---------- */
+async function fetchAll(build){
+  const out = [];
+  for (let from = 0; ; from += 1000) {
+    const r = await build().range(from, from + 999);
+    if (r.error) throw r.error;
+    out.push(...(r.data || []));
+    if ((r.data || []).length < 1000) break;
+  }
+  return out;
+}
+function noteNet(ok){ if (netOk !== ok) { netOk = ok; updateStat(); } }
+async function loadStatic(){
+  const [cats, members, events, totals] = await Promise.all([
+    sb.from('categories').select('*').order('sort'),
+    fetchAll(() => sb.from('members').select('*').order('name')),
+    sb.from('events').select('*').order('event_date', { ascending: false }).order('created_at', { ascending: false }),
+    sb.from('v_event_totals').select('event_id,persons,tx_count')
+  ]);
+  if (cats.error) throw cats.error; if (events.error) throw events.error;
+  T.cats = cats.data || []; T.members = members; T.events = events.data || [];
+  T.totals = {}; (totals.data || []).forEach(r => { T.totals[r.event_id] = r; });
+  if (isAdmin()) { const p = await sb.from('profiles').select('*').order('created_at'); T.profiles = p.data || []; }
+}
+async function loadEvent(id){
+  const q = t => sb.from(t).select('*').eq('event_id', id);
+  const [prices, lists, guests, terms, coat, cash, tx, lines] = await Promise.all([
+    q('event_prices'), q('event_lists'), fetchAll(() => q('list_guests').order('name').order('id')), q('event_terminals'),
+    q('event_coatcheck'), q('cash_counts'),
+    fetchAll(() => q('transactions').order('created_at').order('id')), fetchAll(() => q('transaction_lines').order('id'))
+  ]);
+  [prices, lists, terms, coat, cash].forEach(r => { if (r.error) throw r.error; });
+  T.prices = prices.data || []; T.lists = lists.data || []; T.guests = guests; T.terms = terms.data || [];
+  T.coat = (coat.data || [])[0] || null; T.cash = cash.data || []; T.tx = tx; T.lines = lines;
+}
+async function pullTx(txId){
+  const [t, l] = await Promise.all([sb.from('transactions').select('*').eq('id', txId), sb.from('transaction_lines').select('*').eq('tx_id', txId)]);
+  (t.data || []).forEach(r => upsertLocal('transactions', r));
+  (l.data || []).forEach(r => upsertLocal('transaction_lines', r));
+  mark();
+}
+function pickEvent(){
+  const saved = localStorage.getItem('eos-cur');
+  if (saved && T.events.some(e => e.id === saved)) return saved;
+  const open = T.events.filter(e => e.status === 'open');
+  return (open[0] || T.events[0] || {}).id || null;
+}
+
+/* ---------- Lokale Tabellen pflegen (fuer Live-Abgleich und eigene Aenderungen) ---------- */
+const KEYS = {
+  event_prices: r => r.event_id + '|' + r.category_id, event_lists: r => r.id, list_guests: r => r.id,
+  event_terminals: r => r.event_id + '|' + r.terminal_nr, cash_counts: r => r.event_id + '|' + r.register + '|' + r.phase,
+  transactions: r => r.id, transaction_lines: r => r.id, events: r => r.id, members: r => r.id, categories: r => r.id, profiles: r => r.id
+};
+const TARGET = { event_prices: 'prices', event_lists: 'lists', list_guests: 'guests', event_terminals: 'terms', cash_counts: 'cash',
+                 transactions: 'tx', transaction_lines: 'lines', events: 'events', members: 'members', categories: 'cats', profiles: 'profiles' };
+function recentlyEdited(table, row){ return Date.now() - (lastEdit || 0) < 1500 && table !== 'transactions' && table !== 'transaction_lines'; }
+function upsertLocal(table, row){
+  if (table === 'event_coatcheck') { T.coat = row; return; }
+  const arr = T[TARGET[table]], kf = KEYS[table], k = kf(row), i = arr.findIndex(r => kf(r) === k);
+  if (i >= 0) arr[i] = Object.assign({}, arr[i], row); else arr.push(row);
+}
+function removeLocal(table, row){
+  if (table === 'event_coatcheck') { T.coat = null; return; }
+  const arr = T[TARGET[table]], kf = KEYS[table], k = kf(row), i = arr.findIndex(r => kf(r) === k);
+  if (i >= 0) arr.splice(i, 1);
+}
+function applyChange(table, p){
+  if (p.eventType === 'DELETE') { removeLocal(table, p.old || {}); mark(); return; }
+  if (recentlyEdited(table, p.new)) return;          // eigene, gerade getippte Werte nicht ueberschreiben
+  upsertLocal(table, p.new);
+  if (table === 'transactions' || table === 'transaction_lines') {
+    // Buchung ist beim Server angekommen: wartende Kopie auf dem Geraet entfernen
+    const id = table === 'transactions' ? p.new.id : p.new.tx_id;
+    if (outbox.some(o => o.id === id)) { outbox = outbox.filter(o => o.id !== id); saveOutbox(); }
+  }
+  mark();
+}
+
+/* ---------- Server: Live-Abgleich ---------- */
+let rt = null, rtWasDown = false;
+function stopRealtime(){ if (rt && sb) { try { sb.removeChannel(rt); } catch(e) {} } rt = null; rtState = 'off'; }
+function startRealtime(){
+  stopRealtime();
+  if (!sb || !curId) return;
+  const ch = sb.channel('eos-' + curId + '-' + Math.random().toString(36).slice(2, 7));
+  const f = 'event_id=eq.' + curId;
+  ['event_prices', 'event_lists', 'list_guests', 'event_terminals', 'event_coatcheck', 'cash_counts', 'transactions', 'transaction_lines']
+    .forEach(t => ch.on('postgres_changes', { event: '*', schema: 'public', table: t, filter: f }, p => applyChange(t, p)));
+  ch.on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, p => applyChange('events', p));
+  ch.on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, p => applyChange('members', p));
+  rt = ch;
+  ch.subscribe(status => {
+    if (status === 'SUBSCRIBED') { rtState = 'live'; if (rtWasDown) { rtWasDown = false; refreshSoft(); } }
+    else { rtState = 'down'; rtWasDown = true; }
+    updateStat();
+  });
+}
+function busyWrites(){ return Object.keys(timers).length > 0 || (Date.now() - lastEdit) < 3000; }
+async function refreshSoft(){
+  if (boot !== 'ready' || busyWrites()) return;
+  try { await loadStatic(); if (curId) await loadEvent(curId); lastFull = Date.now(); noteNet(true); }
+  catch(e) { noteNet(!!(e && e.code)); }
+  mark();
+}
+let loopT = null;
+function startLoops(){
+  clearInterval(loopT);
+  loopT = setInterval(() => { if (document.hidden) return; flush(); if (rtState !== 'live' || Date.now() - lastFull > 60000) refreshSoft(); }, 15000);
+}
+window.addEventListener('online', () => { flush(); refreshSoft(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && boot === 'ready') { flush(); refreshSoft(); } });
+window.addEventListener('pagehide', () => { flushWrites(); });
+
+/* ---------- Server: Warteschlange fuer Buchungen (funktioniert auch ohne Netz) ---------- */
+function saveOutbox(){ try { localStorage.setItem('eos-outbox', JSON.stringify(outbox)); } catch(e) {} }
+function enqueue(item){ outbox.push(item); saveOutbox(); mark(); flush(); }
+let flushing = false;
+async function flush(){
+  if (flushing || !sb || boot !== 'ready') return;
+  flushing = true;
+  try {
+    for (const it of outbox.slice()) {
+      if (it.failed) continue;
+      const r = await sendItem(it);
+      if (r === 'net') break;
+    }
+  } finally { flushing = false; mark(); }
+}
+async function sendItem(it){
+  let res;
+  try {
+    res = it.kind === 'checkout'
+      ? await sb.rpc('checkout', { p_tx: it.id, p_event: it.event, p_pay: it.pay, p_lines: it.lines, p_device: DEVICE, p_client_ts: new Date(it.ts).toISOString() })
+      : await sb.rpc('storno_transaction', { p_new_tx: it.id, p_original: it.original });
+  } catch(e) { noteNet(false); return 'net'; }
+  if (res.error) {
+    const code = res.error.code || '';
+    if (!code || /^PGRST3/.test(code) || res.status >= 500) {
+      noteNet(!!code);
+      if (/^PGRST3/.test(code)) { try { await sb.auth.refreshSession(); } catch(e) {} }
+      return 'net';
+    }
+    it.failed = true; it.error = res.error.message; saveOutbox(); return 'rejected';
+  }
+  noteNet(true);
+  outbox = outbox.filter(x => x !== it); saveOutbox();
+  await pullTx(it.id);
+  return 'ok';
+}
+
+/* ---------- Server: Aenderungen schreiben ---------- */
+function errText(e){
+  const c = e && e.code, m = (e && e.message) || '';
+  if (c === '42501' || /row-level security/.test(m)) return 'Dafür fehlt dir die Berechtigung (oder der Anlass ist abgeschlossen).';
+  if (c === '23505') return 'Das gibt es schon.';
+  if (c === '23503') return 'Das wird noch verwendet und lässt sich nicht löschen.';
+  if (!c) return 'Keine Verbindung. Bitte später nochmals versuchen.';
+  return m;
+}
+async function run(promise){
+  let r;
+  try { r = await promise; } catch(e) { noteNet(false); toast('Keine Verbindung.'); return null; }
+  if (r.error) { noteNet(!!r.error.code); toast(errText(r.error)); setTimeout(refreshSoft, 400); return null; }
+  noteNet(true);
+  return r.data == null ? [] : r.data;
+}
+const timers = {}, fns = {};
+function touch(){ lastEdit = Date.now(); }
+function debounced(key, fn, ms){
+  clearTimeout(timers[key]); touch(); fns[key] = fn;
+  timers[key] = setTimeout(async () => { delete timers[key]; const f = fns[key]; delete fns[key]; await f(); }, ms || 600);
+}
+function flushWrites(){
+  Object.keys(timers).forEach(k => { clearTimeout(timers[k]); delete timers[k]; const f = fns[k]; delete fns[k]; if (f) f(); });
+}
+async function writeRows(table, promise){
+  const rows = await run(promise);
+  if (rows) { rows.forEach(r => upsertLocal(table, r)); mark(); }
+  return rows;
+}
+async function deleteRows(table, promise, rowForLocal){
+  const rows = await run(promise);
+  if (rows) { (rows.length ? rows : [rowForLocal]).forEach(r => removeLocal(table, r)); mark(); }
+  return rows;
+}
+const intOrNull = v => { const n = num(v); return n == null ? null : Math.max(0, Math.floor(n)); };
+const cashPayload = r => ({ event_id: r.event_id, register: r.register, phase: r.phase, coins_chf: r.coins_chf, roll_5: r.roll_5, roll_2: r.roll_2, roll_1: r.roll_1,
+                            roll_05: r.roll_05, note_200: r.note_200, note_100: r.note_100, note_50: r.note_50, note_20: r.note_20, note_10: r.note_10 });
+
+// Eingabefelder (data-path) -> passende Tabelle auf dem Server. Wird beim Tippen aufgerufen.
+function persistPath(path, value){
+  const ev = T.events.find(x => x.id === curId);
+  if (!ev || ev.status === 'closed') return;
+  const p = path.split('.');          // ['ev', ...]
+  touch();
+  if (p[1] === 'name' || p[1] === 'date') {
+    const col = p[1] === 'name' ? 'name' : 'event_date';
+    if (col === 'event_date' && !value) return;
+    ev[col] = value;
+    debounced('ev:' + col, () => writeRows('events', sb.from('events').update({ [col]: value }).eq('id', ev.id).select()));
+  }
+  else if (p[1] === 'ab' && (p[2] === 'gutscheine' || p[2] === 'vvkScan')) {
+    const col = p[2] === 'gutscheine' ? 'vouchers_collected' : 'vvk_scanned';
+    ev[col] = intOrNull(value);
+    debounced('ev:' + col, () => writeRows('events', sb.from('events').update({ [col]: ev[col] }).eq('id', ev.id).select()));
+  }
+  else if ((p[1] === 'ab' || p[1] === 'gard') && /^[se]_/.test(p[2] || '')) {
+    const reg = p[1] === 'ab' ? 'AK' : 'Garderobe', ph = p[2][0] === 's' ? 'stock' : 'end', k = p[2].slice(2), col = CASHCOL[k];
+    if (!col) return;
+    let row = T.cash.find(r => r.register === reg && r.phase === ph);
+    if (!row) { row = { event_id: curId, register: reg, phase: ph, coins_chf: 0, roll_5: 0, roll_2: 0, roll_1: 0, roll_05: 0, note_200: 0, note_100: 0, note_50: 0, note_20: 0, note_10: 0 }; T.cash.push(row); }
+    row[col] = k === 'm' ? Math.max(0, num(value) || 0) : (intOrNull(value) || 0);
+    debounced('cash:' + reg + ph, () => writeRows('cash_counts', sb.from('cash_counts').upsert(cashPayload(row), { onConflict: 'event_id,register,phase' }).select()), 700);
+  }
+  else if (p[1] === 'gard' && COATCOL[p[2]]) {
+    if (!T.coat) T.coat = { event_id: curId };
+    const col = COATCOL[p[2]];
+    T.coat[col] = /Free$/.test(p[2]) ? (intOrNull(value) || 0) : intOrNull(value);
+    debounced('coat', () => {
+      const c = T.coat, pl = { event_id: curId };
+      Object.keys(COATCOL).forEach(k => { pl[COATCOL[k]] = c[COATCOL[k]] == null && /Free$/.test(k) ? 0 : (c[COATCOL[k]] == null ? null : c[COATCOL[k]]); });
+      return writeRows('event_coatcheck', sb.from('event_coatcheck').upsert(pl, { onConflict: 'event_id' }).select());
+    }, 700);
+  }
+  else if (p[1] === 'terms') {
+    const row = termRows()[+p[2]]; if (!row) return;
+    if (p[3] === 'amt') { row.daily_close = num(value); debounced('term:' + row.terminal_nr, () => writeRows('event_terminals', sb.from('event_terminals').update({ daily_close: row.daily_close }).match({ event_id: curId, terminal_nr: row.terminal_nr }).select())); }
+    else if (p[3] === 'use') { row.used_at = value; writeRows('event_terminals', sb.from('event_terminals').update({ used_at: value }).match({ event_id: curId, terminal_nr: row.terminal_nr }).select()); }
+    else if (p[3] === 'nr') {
+      const old = Object.assign({}, row), nr = +value;
+      (async () => {
+        const del = await run(sb.from('event_terminals').delete().match({ event_id: curId, terminal_nr: old.terminal_nr }).select());
+        if (del) { removeLocal('event_terminals', old); await writeRows('event_terminals', sb.from('event_terminals').insert({ event_id: curId, terminal_nr: nr, used_at: old.used_at, daily_close: old.daily_close }).select()); }
+      })();
+    }
+  }
+  else if (p[1] === 'plist') {
+    const row = priceRows()[+p[2]]; if (!row) return;
+    if (p[3] === 'price') { row.price = num(value); debounced('price:' + row.category_id, () => writeRows('event_prices', sb.from('event_prices').update({ price: row.price }).match({ event_id: curId, category_id: row.category_id }).select())); }
+    else if (p[3] === 'on') { row.active = !!value; writeRows('event_prices', sb.from('event_prices').update({ active: !!value }).match({ event_id: curId, category_id: row.category_id }).select()); }
+    else if (p[3] === 'cat') {
+      const old = Object.assign({}, row);
+      (async () => {
+        const del = await run(sb.from('event_prices').delete().match({ event_id: curId, category_id: old.category_id }).select());
+        if (del) {
+          removeLocal('event_prices', old);
+          await writeRows('event_prices', sb.from('event_prices').insert({ event_id: curId, category_id: value, price: old.price, active: true }).select());
+          const c = S.cats.find(x => x.id === value);
+          if (c && c.reduced) await reloadPrices();    // Reduziert-Regel (wie add_reduced_price) hier nicht noetig; Stand neu laden
+        }
+      })();
+    }
+  }
+  else if (p[1] === 'lists') {
+    const row = listRows()[+p[2]]; if (!row || row.is_default) return;
+    if (p[3] === 'name') { row.name = value; debounced('lname:' + row.id, () => writeRows('event_lists', sb.from('event_lists').update({ name: row.name.trim() }).eq('id', row.id).select())); }
+    else if (p[3] === 'price') {
+      const pr = String(value).trim() === '' ? null : num(value);
+      if (String(value).trim() !== '' && pr == null) return;
+      row.price = pr; debounced('lprice:' + row.id, () => writeRows('event_lists', sb.from('event_lists').update({ price: pr }).eq('id', row.id).select()));
+    }
+  }
+  mark();
+}
+async function reloadPrices(){ const r = await sb.from('event_prices').select('*').eq('event_id', curId); if (!r.error) { T.prices = r.data || []; mark(); } }
+
+/* ---------- Anmeldung und Start ---------- */
+function initClient(){
+  const c = cfg();
+  if (!c.url || !c.anonKey || !window.supabase) return false;
+  sb = window.supabase.createClient(c.url, c.anonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+  sb.auth.onAuthStateChange(evt => { if (evt === 'SIGNED_OUT' && boot === 'ready') { resetSession(); boot = 'login'; render(); } });
+  return true;
+}
+function resetSession(){ stopRealtime(); clearInterval(loopT); me = null; profile = null; role = null; Object.keys(T).forEach(k => { T[k] = Array.isArray(T[k]) ? [] : (k === 'totals' ? {} : null); }); T.coat = null; curId = null; EV = null; evDirty = true; syncS(); }
+async function start(){
+  boot = 'init'; render();
+  if (!window.supabase) { boot = 'error'; bootMsg = 'Die Bibliothek supabase-js konnte nicht geladen werden. Prüfe die Internetverbindung und lade die Seite neu.'; render(); return; }
+  if (!initClient()) { boot = 'config'; render(); return; }
+  let s;
+  try { s = await sb.auth.getSession(); } catch(e) { boot = 'error'; bootMsg = 'Keine Verbindung zum Server.'; render(); return; }
+  if (!s.data || !s.data.session) { boot = 'login'; render(); return; }
+  await afterLogin(s.data.session.user);
+}
+async function afterLogin(user){
+  me = user;
+  const r = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+  if (r.error) { boot = 'error'; bootMsg = 'Profil konnte nicht geladen werden: ' + errText(r.error); render(); return; }
+  profile = r.data;
+  if (!profile || !profile.active) { boot = 'waiting'; render(); return; }
+  role = ROLE_FROM_DB[profile.role]; tab = TABS[role][0]; openState.cats = (role === 'kasse');
+  try {
+    await loadStatic(); syncS();
+    curId = pickEvent();
+    if (curId) await loadEvent(curId);
+    lastFull = Date.now(); noteNet(true);
+  } catch(e) { boot = 'error'; bootMsg = 'Daten konnten nicht geladen werden: ' + errText(e); render(); return; }
+  boot = 'ready'; evDirty = true; syncS();
+  startRealtime(); startLoops(); render(); flush();
+}
+async function doLogin(){
+  const mail = ($('#lgMail').value || '').trim(), pw = $('#lgPw').value || '';
+  if (!mail || !pw) { $('#lgErr').textContent = 'E-Mail und Passwort eintragen.'; return; }
+  $('#lgErr').textContent = '';
+  let r;
+  try { r = await sb.auth.signInWithPassword({ email: mail, password: pw }); } catch(e) { $('#lgErr').textContent = 'Keine Verbindung zum Server.'; return; }
+  if (r.error) { $('#lgErr').textContent = /invalid/i.test(r.error.message) ? 'E-Mail oder Passwort stimmt nicht.' : r.error.message; return; }
+  await afterLogin(r.data.user);
+}
+async function doLogout(){ flushWrites(); try { await sb.auth.signOut(); } catch(e) {} resetSession(); boot = 'login'; render(); }
+async function selectEvent(id){
+  flushWrites();
+  curId = id; try { localStorage.setItem('eos-cur', id); } catch(e) {}
+  T.prices = []; T.lists = []; T.guests = []; T.terms = []; T.coat = null; T.cash = []; T.tx = []; T.lines = [];
+  mark();
+  try { await loadEvent(id); noteNet(true); } catch(e) { noteNet(!!(e && e.code)); }
+  startRealtime(); mark();
+}
+
+function prow(c){ return (E().plist||[]).find(r=>r.cat===c.id); }
+function remaining(cat){ return peopleFor(cat).reduce((s,g)=>s+Math.max(0,g.n-guestIn(g.id)-guestInCart(g.id)),0); }
+function isOn(c){
+  if(c.virtual) return remaining(c)>0;
+  if(c.kind==='free') return c.active&&(!c.list||remaining(c)>0);
+  const r=prow(c); return !!r&&r.on!==false;
+}
+function priceOf(c){ if(c.virtual) return c.price; if(c.kind==='free') return 0; const r=prow(c); return r?num(r.price):null; }
+function priceMissing(c){ return c.kind==='paid'&&!c.virtual&&isOn(c)&&priceOf(c)==null; }
+function unavailable(c){ return c.kind!=='free'&&!isOn(c); }
+const lk=path=>(E().closed&&String(path).indexOf('ev.')===0)?' disabled':'';
+function blocked(){ if(E().closed){ toast('Dieser Anlass ist abgeschlossen. Nur der Admin kann ihn wieder öffnen.'); return true; } return false; }
+function applyReduceRule(catId){
+  const c=S.cats.find(x=>x.id===catId); if(!c||!c.reduced) return;
+  E().plist.forEach(r=>{
+    if(r.cat===catId){ r.on=true; return; }
+    const rc=S.cats.find(x=>x.id===r.cat);
+    if(r.cat==='normal'||(rc&&rc.reduced&&rc.reduced<c.reduced)) r.on=false;
+  });
+}
+function parts(o,p){
+  const m=num(o[p+'_m'])||0; let rolls=0, noten=0;
+  ROLLEN.forEach(r=>{ rolls+=(num(o[p+'_'+r.k])||0)*r.val; });
+  NOTEN.forEach(n=>{ if(p==='s'&&!n.stock) return; noten+=(num(o[p+'_'+n.k])||0)*n.d; });
+  rolls=round2(rolls); noten=round2(noten);
+  const any=!!o[p+'_row'];
+  return {m:any?m:null,rolls:rolls,noten:noten,total:any?round2(m+rolls+noten):null};
+}
+const fmtTot=p=>p.total==null?'–':'CHF '+chf(p.total);
+const fmtBreak=p=>p.total==null?'–':'Münz '+chf(p.m||0)+' · Rollen '+chf(p.rolls)+' · Noten '+chf(p.noten)+' · Total <b>CHF '+chf(p.total)+'</b>';
+
+function get(p){ const ks=p.split('.'); if(ks[0]!=='ev') return undefined; ks.shift(); return ks.reduce((x,k)=>x==null?x:x[k],E()); }
+
+/* ---------- Auswertungen ---------- */
+function stats(){
+  const r={n:0,bar:0,karte:0,byCat:{},byName:{}};
+  E().entries.forEach(e=>{
+    r.n+=e.qty;
+    if(e.pay==='bar') r.bar+=e.amount;
+    if(e.pay==='karte') r.karte+=e.amount;
+    r.byCat[e.cat]=(r.byCat[e.cat]||0)+e.qty;
+    r.byName[e.name]=(r.byName[e.name]||0)+e.qty;
+  });
+  r.bar=round2(r.bar); r.karte=round2(r.karte);
+  return r;
+}
+function voucherCount(){
+  const ids=S.cats.filter(c=>c.voucher).map(c=>c.id);
+  return E().entries.filter(e=>ids.indexOf(e.cat)>=0).reduce((s,e)=>s+e.qty,0);
+}
+function termSum(use){
+  let sum=0, any=false;
+  E().terms.forEach(t=>{ const v=num(t.amt); if(t.use===use&&v!=null){ sum+=v; any=true; } });
+  return {sum:round2(sum),any:any};
+}
+function termsMissing(){ return E().terms.filter(t=>num(t.amt)==null).map(t=>'Nr. '+t.nr+' ('+(t.use==='AK'?'Abendkasse':'Garderobe')+')'); }
+
+function item(label,system,counted,unit,src){
+  let d=null,cls='open',status='noch offen';
+  if(counted!=null){
+    d=round2(counted-system);
+    if(d===0){cls='ok';status='✓ stimmt';}
+    else{cls='bad';const a=unit==='chf'?chf(Math.abs(d)):Math.abs(d);status='! '+(d<0?'fehlt ':'zu viel ')+a;}
+  }
+  return {label,system,counted,unit,src,d,cls,status};
+}
+const fv=(v,u)=>v==null?'–':(u==='chf'?chf(v):v);
+
+/* Gäste und Listen */
+function guestIn(id){ return E().entries.filter(e=>e.guest===id).reduce((s,e)=>s+e.qty,0); }
+function guestInCart(id){ return E().cart.filter(l=>l.guest===id).reduce((s,l)=>s+l.qty,0); }
+function memberCat(){ return S.cats.find(c=>c.list==='members'); }
+function listById(id){ return E().lists.find(l=>l.id===id); }
+function listCat(l){ const pr=num(l.price), paid=pr!=null&&pr>0; return {id:'L:'+l.id,name:l.name,kind:paid?'paid':'free',price:paid?pr:0,list:'event',listId:l.id,virtual:true}; }
+function findCat(id){ if(String(id).indexOf('L:')===0){ const l=listById(String(id).slice(2)); return l?listCat(l):null; } return S.cats.find(c=>c.id===id)||null; }
+function evCats(){ return S.cats.filter(c=>c.kind!=='free').concat(E().lists.map(listCat),S.cats.filter(c=>c.kind==='free')); }
+function memberPeople(cat){ return S.members.map(x=>({id:x.id,name:x.name,n:1,member:true,cat:cat.id,catName:cat.name})); }
+function allGuests(){
+  const mc=memberCat();
+  const ev=E().guests.map(g=>Object.assign({},g,{catName:(listById(g.list)||{}).name||'Liste'}));
+  return ev.concat(mc?memberPeople(mc):[]);
+}
+function peopleFor(cat){
+  if(cat.virtual) return E().guests.filter(g=>g.list===cat.listId).map(g=>Object.assign({},g,{catName:cat.name}));
+  if(cat.list==='members') return memberPeople(cat);
+  return [];
+}
+function catOf(g){
+  if(g.member) return memberCat()||{id:'member',name:'Member',kind:'free',price:0};
+  const l=listById(g.list); return l?listCat(l):{id:'L:'+g.list,name:g.catName||'Liste',kind:'free',price:0};
+}
+function glStats(){
+  const gs=E().guests;
+  const total=gs.reduce((s,g)=>s+g.n,0), inn=gs.reduce((s,g)=>s+guestIn(g.id),0);
+  const mIn=S.members.reduce((s,m)=>s+guestIn(m.id),0);
+  return {count:gs.length,total:total,inn:inn,open:Math.max(0,total-inn),mIn:mIn};
+}
+
+function gardSide(first,last,manual,free){
+  const m=num(manual); let n=null;
+  if(m!=null) n=m; else { const a=num(first),b=num(last); if(a!=null&&b!=null&&b>=a) n=b-a+1; }
+  const f=num(free)||0;
+  return {n,free:f,paid:n==null?null:Math.max(0,n-f)};
+}
+function gardData(){
+  const g=E().gard;
+  const j=gardSide(g.jFirst,g.jLast,g.jManual,g.jFree), t=gardSide(g.tFirst,g.tLast,g.tManual,g.tFree);
+  const soll=round2((j.paid||0)*PRICE_JACKE+(t.paid||0)*PRICE_TASCHE);
+  const ps=parts(g,'s'), pe=parts(g,'e'), tg=termSum('Garderobe');
+  const txt=s=>s.n==null?'noch offen':s.n+' ausgegeben'+(s.free?', davon '+s.free+' ohne Bezahlung':'');
+  return {soll:soll,items:[
+    {info:true,label:'Jacken ('+PRICE_JACKE+'.–)',text:txt(j)},
+    {info:true,label:'Taschen ('+PRICE_TASCHE+'.–)',text:txt(t)},
+    item('Umsatz Garderobe (bar + Karte)',soll,(ps.total!=null&&pe.total!=null)?round2(pe.total-ps.total+tg.sum):null,'chf',ps.total==null?'Stock fehlt (Tab Anlass)':'Endbestand − Stock + Karte laut Terminal')
+  ],j:j,t:t};
+}
+function abschlussData(){
+  const a=E().ab, st=stats(), ps=parts(a,'s'), pe=parts(a,'e'), tAK=termSum('AK');
+  const out={};
+  out.ak=[
+    item('Bargeld',st.bar,(ps.total!=null&&pe.total!=null)?round2(pe.total-ps.total):null,'chf',ps.total==null?'Stock fehlt (Tab Anlass)':'Endbestand − Stock'),
+    item('Karte',st.karte,tAK.any?tAK.sum:null,'chf','System gegen Tagesabschlüsse AK')
+  ];
+  out.gard=gardData().items;
+  const all=st.n, vvk=num(a.vvkScan), miss=termsMissing();
+  out.misc=[item('Gutscheine',voucherCount(),num(a.gutscheine),'n','System gegen eingezogene Gutscheine'),
+    {info:true,label:'Gesamteinlass',text:vvk==null?(all+' an der Abendkasse, VVK noch offen'):(all+' an der Abendkasse + '+vvk+' VVK = '+(all+vvk))}];
+  if(miss.length) out.misc.push({info:true,label:'Tagesabschluss fehlt',text:miss.join(', ')});
+  if(E().guests.length){ const g=glStats(); out.misc.push({info:true,label:'Gästelisten',text:g.inn+' von '+g.total+' Personen eingelassen, '+g.open+' noch offen'}); }
+  return out;
+}
+function allItems(ad){ return [].concat(ad.ak,ad.gard,ad.misc).filter(i=>!i.info); }
+
+/* ---------- Bausteine ---------- */
+function inp(path,label,o){
+  o=o||{}; const v=get(path);
+  const attrs=o.type?'type="'+o.type+'"':'inputmode="'+(o.mode||'decimal')+'"';
+  return '<label class="f"><span>'+label+'</span><input data-path="'+path+'" '+attrs+' value="'+esc(v==null?'':v)+'" autocomplete="off"'+(o.ph?' placeholder="'+esc(o.ph)+'"':'')+lk(path)+'></label>';
+}
+function renderItems(items){
+  return items.map(i=>{
+    if(i.info) return '<div class="cmp info"><div class="cl">'+esc(i.label)+'</div><div class="cn2">'+esc(i.text)+'</div></div>';
+    return '<div class="cmp '+i.cls+'"><div class="cl">'+esc(i.label)+(i.src?'<small>'+esc(i.src)+'</small>':'')+'</div>'+
+      '<div class="cn2"><span>System <b>'+fv(i.system,i.unit)+'</b></span><span>Gezählt <b>'+fv(i.counted,i.unit)+'</b></span></div>'+
+      '<div class="cs">'+esc(i.status)+'</div></div>';
+  }).join('');
+}
+function statusHtml(ad){
+  const its=allItems(ad), bad=its.filter(i=>i.cls==='bad').length, open=its.filter(i=>i.cls==='open').length;
+  let cls='', txt;
+  if(bad){ cls='bad'; txt='! '+bad+(bad===1?' Differenz':' Differenzen')+(open?', '+open+' Werte noch offen':''); }
+  else if(open){ txt=open+' Werte noch offen, bisher keine Differenz'; }
+  else { cls='ok'; txt='✓ Alles stimmt'; }
+  return '<div class="status '+cls+'" role="status">'+txt+'</div>';
+}
+function topbar(){
+  const opts=S.events.map(ev=>'<option value="'+ev.id+'"'+(ev.id===curId?' selected':'')+'>'+esc((ev.name||'ohne Namen')+' · '+dmy(ev.date).slice(0,5))+'</option>').join('');
+  return '<div class="topbar"><label class="evsel"><span>Anlass (an der Kasse einkassieren für)</span><select id="evSel">'+opts+'</select></label>'+
+    '<button class="rolebtn" data-act="role" aria-label="Konto, angemeldet als '+ROLES[role]+'">'+ROLES[role]+'</button></div>'+
+    '<div class="statline" id="stat">'+statHtml()+'</div>';
+}
+
+/* ---------- Warenkorb ---------- */
+function cartTotal(){ return round2(E().cart.reduce((a,l)=>a+l.amount,0)); }
+function cartCount(){ return E().cart.reduce((a,l)=>a+l.qty,0); }
+function cartQtyFor(id){ return E().cart.filter(l=>l.cat===id).reduce((a,l)=>a+l.qty,0); }
+function cartAdd(cat){
+  if(blocked()) return;
+  if(unavailable(cat)){ toast('Diese Kategorie ist für diesen Anlass nicht im Einsatz.'); return; }
+  if(cat.kind==='custom'){ openSheet(cat); return; }
+  if(priceMissing(cat)){ toast('Für diesen Anlass fehlt der Preis. Die Produktion trägt ihn im Tab Anlass ein.'); return; }
+  if(cat.list){ openSearch(cat); return; }
+  const cart=E().cart;
+  let l=cart.find(x=>x.cat===cat.id&&!x.custom&&!x.guest);
+  if(!l){ l={id:uid(),cat:cat.id,name:cat.name,kind:cat.kind,price:cat.kind==='free'?0:priceOf(cat),qty:0,amount:0}; cart.push(l); }
+  l.qty++; l.amount=round2(l.price*l.qty); save(); render(true);
+}
+function cartAddGuest(g){
+  if(blocked()) return false;
+  const cat=catOf(g), rem=g.n-guestIn(g.id)-guestInCart(g.id);
+  if(rem<=0) return false;
+  if(unavailable(cat)){ toast('Diese Kategorie ist für diesen Anlass nicht im Einsatz.'); return false; }
+  if(priceMissing(cat)){ toast('Für diesen Anlass fehlt der Preis.'); return false; }
+  const cart=E().cart;
+  let l=cart.find(x=>x.guest===g.id);
+  if(!l){ l={id:uid(),cat:cat.id,name:cat.name,kind:cat.kind,price:cat.kind==='free'?0:(priceOf(cat)||0),qty:0,amount:0,guest:g.id,who:g.name,max:g.n}; cart.push(l); }
+  l.qty++; l.amount=round2(l.price*l.qty); save(); return true;
+}
+function cartAddCustom(cat,q,a){
+  if(blocked()) return;
+  const pr=priceOf(cat)||0;
+  const l={id:uid(),cat:cat.id,name:cat.name,kind:'custom',custom:true,price:pr,qty:q,amount:a};
+  if(pr) l.ref=pr*q;
+  E().cart.push(l); save(); render(true);
+}
+function cartChange(id,delta){
+  if(blocked()) return;
+  const cart=E().cart, i=cart.findIndex(x=>x.id===id); if(i<0) return; const l=cart[i];
+  if(l.custom||l.qty+delta<=0){ cart.splice(i,1); }
+  else {
+    if(delta>0&&l.guest&&(l.max-guestIn(l.guest)-l.qty)<=0){ toast('Mehr Personen sind für diesen Eintrag nicht auf der Liste'); return; }
+    l.qty+=delta; l.amount=round2(l.price*l.qty);
+  }
+  save(); render(true);
+}
+function toRpcLine(l){
+  if(String(l.cat).indexOf('L:')===0) return {list_id:String(l.cat).slice(2),guest_id:l.guest,qty:l.qty};
+  if(l.guest) return {category_id:l.cat,member_id:l.guest,qty:l.qty};
+  if(l.custom) return {category_id:l.cat,qty:l.qty,amount:l.amount};
+  return {category_id:l.cat,qty:l.qty};
+}
+function checkout(pay){
+  if(blocked()) return;
+  const e=E(); if(!e.cart.length) return;
+  const tot=cartTotal(), n=cartCount(), cart=e.cart.slice();
+  e.cart=[]; save();
+  enqueue({kind:'checkout',id:uuid(),event:e.id,pay:tot>0?pay:null,lines:cart.map(toRpcLine),
+           view:cart.map(l=>({cat:l.cat,name:l.name,qty:l.qty,amount:l.amount,guest:l.guest,who:l.who})),ts:Date.now()});
+  render(true);
+  toast(tot>0?'Kassiert: CHF '+chfs(tot)+(pay==='bar'?' bar':' Karte'):n+(n===1?' Person eingelassen':' Personen eingelassen'));
+}
+function bookDirect(cat,g){
+  if(blocked()) return;
+  const l={cat:cat.id,name:cat.name,qty:1,amount:0,guest:g.id,who:g.name};
+  enqueue({kind:'checkout',id:uuid(),event:E().id,pay:null,lines:[toRpcLine(l)],view:[l],ts:Date.now()});
+  render(true);
+}
+function logGroups(){
+  const map={}, order=[];
+  E().entries.forEach(e=>{
+    const k=e.tx||e.id;
+    if(!map[k]){ map[k]={tx:k,ts:e.ts,storno:!!e.stornoOf,items:[],bar:0,karte:0,voided:true,who:[],pending:false}; order.push(k); }
+    const g=map[k]; g.items.push(e); if(e.pending) g.pending=true;
+    if(e.pay==='bar') g.bar=round2(g.bar+e.amount);
+    if(e.pay==='karte') g.karte=round2(g.karte+e.amount);
+    if(!e.voided&&!e.stornoOf) g.voided=false;
+    if(e.who&&g.who.indexOf(e.who)<0) g.who.push(e.who);
+  });
+  return order.map(k=>map[k]);
+}
+function groupText(g){
+  const by={}, names=[];
+  g.items.forEach(e=>{ if(by[e.name]==null){by[e.name]=0;names.push(e.name);} by[e.name]+=Math.abs(e.qty); });
+  return names.map(n=>by[n]+'× '+n).join(', ');
+}
+
+/* ---------- Zeitauswertung ---------- */
+const pad2=n=>('0'+n).slice(-2);
+function parseHM(v){ const m=/^(\d{1,2}):(\d{2})$/.exec(v||''); return m?(+m[1])*60+(+m[2]):null; }
+function inRange(ts){
+  const f=parseHM(rFrom), t=parseHM(rTo);
+  if(f==null&&t==null) return true;
+  const d=new Date(ts), m=d.getHours()*60+d.getMinutes();
+  if(f!=null&&t!=null) return f<=t?(m>=f&&m<=t):(m>=f||m<=t);
+  return f!=null?m>=f:m<=t;
+}
+function rangeHtml(){
+  const filtered=parseHM(rFrom)!=null||parseHM(rTo)!=null;
+  const r={n:0,bar:0,karte:0,byName:{}};
+  E().entries.forEach(e=>{
+    if(!inRange(e.ts)) return;
+    r.n+=e.qty; if(e.pay==='bar') r.bar+=e.amount; if(e.pay==='karte') r.karte+=e.amount;
+    r.byName[e.name]=(r.byName[e.name]||0)+e.qty;
+  });
+  r.bar=round2(r.bar); r.karte=round2(r.karte);
+  const names=Object.keys(r.byName).filter(n=>r.byName[n]!==0);
+  let h='<p class="sub" style="margin:8px 0">'+(filtered?'Zeitraum '+esc(rFrom||'Anfang')+' bis '+esc(rTo||'Ende')+': ':'Ganzer Abend: ')+
+    '<b>'+r.n+'</b> Personen · bar <b>CHF '+chf(r.bar)+'</b> · Karte <b>CHF '+chf(r.karte)+'</b></p>';
+  h+=names.length?'<ul class="log">'+names.map(n=>'<li>'+esc(n)+': <b>'+r.byName[n]+'</b></li>').join('')+'</ul>':'<p class="empty">'+(filtered?'In diesem Zeitraum wurde nichts gebucht.':'Noch nichts gebucht.')+'</p>';
+  const hb={}, order=[];
+  E().entries.forEach(e=>{
+    const d=new Date(e.ts), k=d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()+'-'+d.getHours();
+    if(!hb[k]){ hb[k]={h:d.getHours(),n:0,amt:0}; order.push(k); }
+    hb[k].n+=e.qty; hb[k].amt+=e.amount;
+  });
+  if(order.length) h+='<h3>Pro Stunde (ganzer Abend)</h3><ul class="log">'+order.map(k=>{ const b=hb[k]; return '<li>'+pad2(b.h)+':00 bis '+pad2((b.h+1)%24)+':00: <b>'+b.n+'</b> Personen · CHF '+chf(round2(b.amt))+'</li>'; }).join('')+'</ul>';
+  return h+(filtered||order.length?'<p class="hint">Stornos zählen zum Zeitpunkt der Stornierung.</p>':'');
+}
+function rangeControls(){
+  return '<div class="fgrid" style="margin-top:8px"><label class="f"><span>Von (Uhrzeit)</span><input id="rFrom" type="time" value="'+esc(rFrom)+'"></label>'+
+    '<label class="f"><span>Bis (Uhrzeit)</span><input id="rTo" type="time" value="'+esc(rTo)+'"></label></div>'+
+    '<div class="btns"><button class="ghost" data-range="30">Letzte 30 Min</button><button class="ghost" data-range="60">Letzte 60 Min</button><button class="ghost" data-range="0">Ganzer Abend</button></div>';
+}
+
+/* ---------- Views ---------- */
+function viewEinlass(){
+  const st=stats(), e=E();
+  const cats=evCats().filter(c=>isOn(c)).map(c=>{
+    const n=cartQtyFor(c.id), miss=priceMissing(c), pr=priceOf(c);
+    const p=miss?'Preis fehlt':c.list?('Person suchen'+(c.kind==='paid'?' · CHF '+chfs(pr):'')):c.kind==='free'?'gratis':c.kind==='custom'?'Betrag frei':'CHF '+chfs(pr);
+    return '<button class="cat '+c.kind+'" data-cat="'+c.id+'"'+(miss||E().closed?' disabled':'')+'><span class="cn">'+esc(c.name)+'</span><span class="cp">'+p+'</span><span class="cc'+(n?' on':'')+'" aria-label="'+n+' im Warenkorb">'+n+'</span></button>';
+  }).join('');
+  const missing=S.cats.filter(priceMissing);
+  const hiddenLists=e.lists.filter(l=>remaining(listCat(l))===0).map(l=>l.name);
+  const cart=e.cart.length?'<div class="card cart"><h2>Warenkorb</h2><ul>'+e.cart.map(l=>
+    '<li><span class="cq">'+l.qty+'×</span><span class="cname">'+esc(l.name)+(l.who?'<small>'+esc(l.who)+'</small>':l.custom?'<small>Betrag frei</small>':'')+'</span>'+
+    '<span class="cam">'+(l.kind==='free'?'gratis':'CHF '+chfs(l.amount))+'</span>'+
+    '<span class="cbtn">'+(l.custom?'<button data-cdel="'+l.id+'" aria-label="Zeile entfernen">✕</button>':'<button data-cdec="'+l.id+'" aria-label="Eine Person weniger">−</button><button data-cinc="'+l.id+'" aria-label="Eine Person mehr">+</button>')+'</span></li>').join('')+'</ul></div>':'';
+  const groups=logGroups().slice(-6).reverse().map(g=>{
+    const t=new Date(g.ts).toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'});
+    const money=[g.bar?'CHF '+chf(g.bar)+' bar':'',g.karte?'CHF '+chf(g.karte)+' Karte':''].filter(Boolean).join(' + ');
+    const what=(g.storno?'Storno: ':'')+esc(groupText(g))+(g.who.length?' – '+esc(g.who.join(', ')):'')+(money?' · '+money:'')+(g.pending?' · noch nicht gesendet':'');
+    const btn=(!g.storno&&!g.voided&&!E().closed)?'<button class="ghost" data-storno="'+g.tx+'">Stornieren</button>':'';
+    return '<li class="'+(!g.storno&&g.voided?'voided':'')+'"><span class="t">'+t+'</span><span class="d">'+what+'</span>'+btn+'</li>';
+  }).join('');
+  const byName=Object.keys(st.byName).filter(n=>st.byName[n]!==0).map(n=>'<li>'+esc(n)+': <b>'+st.byName[n]+'</b></li>').join('');
+  return '<div class="hero"><div class="big">'+st.n+'</div><div class="bigl">an der Abendkasse eingelassen</div></div>'+
+    '<p class="sub">bar <b>CHF '+chf(st.bar)+'</b> · Karte <b>CHF '+chf(st.karte)+'</b></p>'+
+    (missing.length?'<p class="note">Preis fehlt für diesen Anlass: '+missing.map(c=>esc(c.name)).join(', ')+'. Die Produktion trägt ihn im Tab Anlass ein.</p>':(!evCats().some(c=>c.kind!=='free'&&isOn(c))?'<p class="note">Für diesen Anlass sind noch keine Preise erfasst. Die Produktion trägt sie im Tab Anlass ein.</p>':''))+
+    cart+
+    '<details class="dtl catbox" data-open="cats"'+((openState.cats||e.cart.length)?' open':'')+'><summary>Abendkasse: Kategorien zum Tippen</summary><div class="cats">'+cats+'</div>'+(hiddenLists.length?'<p class="hint" style="margin:0 0 10px">Ohne offene Gäste ausgeblendet: '+hiddenLists.map(esc).join(', ')+'.</p>':'')+'</details>'+
+    '<div class="card"><h2>Letzte Buchungen</h2>'+(groups?'<ul class="log">'+groups+'</ul>':'<p class="empty">Noch keine Buchungen. Kategorie antippen und einkassieren.</p>')+
+    '<p class="hint" style="margin-top:8px">Stornieren löscht nichts, sondern bucht die ganze Buchung gegen.</p></div>'+
+    '<div class="card"><details class="dtl" data-open="zaehl"'+(openState.zaehl?' open':'')+'><summary>Zählung nach Kategorie und Zeitraum</summary>'+rangeControls()+'<div id="rangeOut">'+rangeHtml()+'</div></details></div>';
+}
+function renderCartBar(){
+  const bar=$('#cartbar'), main=$('#app');
+  const show=tab==='einlass'&&E().cart.length>0&&!E().closed;
+  main.classList.toggle('hasbar',show);
+  if(!show){ bar.hidden=true; bar.innerHTML=''; return; }
+  const tot=cartTotal(), n=cartCount();
+  const sum=E().cart.map(l=>l.qty+'× '+l.name+(l.who?' ('+l.who+')':'')).join(', ');
+  bar.innerHTML='<div class="in"><div class="top"><div class="sum">'+n+(n===1?' Person':' Personen')+' · '+esc(sum)+'</div><div class="total" aria-live="polite">CHF '+chfs(tot)+'</div></div>'+
+    '<div class="btns"><button class="ghost" data-cb="clear">Leeren</button>'+
+    (tot>0?'<button class="primary" data-cb="bar">Bar einkassieren</button><button class="primary" data-cb="karte">Karte einkassieren</button>':'<button class="primary" data-cb="bar">Einlassen</button>')+'</div></div>';
+  bar.hidden=false;
+}
+
+let gSearch='';
+const openState={};
+let rFrom='', rTo='';
+function guestRowHtml(g){
+  const inn=guestIn(g.id), done=inn>=g.n, cat=catOf(g), canEdit=g.member?isAdmin():isProd();
+  const act=cat.kind==='free'?'Einlassen':'In den Warenkorb';
+  return '<li class="g'+(done?' done':'')+'"><div><div class="gn">'+esc(g.name)+'</div><div class="gm">'+esc(g.catName)+(g.member?' (alle Anlässe)':' · '+g.n+(g.n===1?' Person':' Personen'))+(g.via?' · über '+esc(g.via):'')+'</div></div>'+
+    '<div class="gs">'+(done?'✓ ':'')+inn+' / '+g.n+'</div>'+
+    '<div class="gb">'+(done?'<span class="hint" style="flex:1;align-self:center">Komplett eingelassen</span>':'<button class="primary" data-gin="'+g.id+'">'+act+'</button>')+
+    (inn>0?'<button class="ghost" data-gout="'+g.id+'" aria-label="Eine Person zurücknehmen">−1</button>':'')+
+    (!g.member&&isProd()?'<button class="ghost" data-gplus="'+g.id+'" aria-label="Anzahl Personen um eins erhöhen">Anzahl +1</button>':'')+
+    (inn===0&&canEdit?'<button class="ghost" data-gdel="'+g.id+'" aria-label="Gast entfernen">Entfernen</button>':'')+'</div></li>';
+}
+function guestRows(){
+  const q=norm(gSearch.trim()), all=allGuests();
+  const list=all.filter(g=>!q||norm(g.name+' '+(g.via||'')).indexOf(q)>=0);
+  if(q&&!list.length) return '<p class="empty">Kein Treffer für «'+esc(gSearch)+'».</p>';
+  const groups={}, order=[];
+  E().lists.forEach(l=>{ const pr=num(l.price); groups[l.id]={name:l.name,tag:(pr!=null&&pr>0)?'CHF '+chfs(pr):'gratis',items:[]}; order.push(l.id); });
+  const mc=memberCat(); if(mc){ groups.members={name:mc.name+' (alle Anlässe)',tag:'',items:[]}; order.push('members'); }
+  list.forEach(g=>{ const k=g.member?'members':g.list; if(groups[k]) groups[k].items.push(g); });
+  return order.filter(k=>!q||groups[k].items.length).map(k=>{
+    const gr=groups[k], items=gr.items.sort((a,b)=>a.name.localeCompare(b.name,'de'));
+    const persons=items.reduce((s,g)=>s+g.n,0), inn=items.reduce((s,g)=>s+guestIn(g.id),0);
+    const open=q||openState['grp:'+k];
+    return '<details class="dtl grp" data-open="grp:'+k+'"'+(open?' open':'')+'><summary>'+esc(gr.name)+(gr.tag?' · '+gr.tag:'')+' · '+persons+(persons===1?' Person':' Personen')+' · '+inn+' eingelassen</summary>'+
+      (items.length?'<ul class="gl">'+items.slice(0,80).map(guestRowHtml).join('')+'</ul>':'<p class="empty">Noch niemand auf dieser Liste.</p>')+'</details>';
+  }).join('');
+}
+function viewGl(){
+  const g=glStats(), e=E();
+  const opts=e.lists.map(l=>'<option value="'+l.id+'"'+(l.id==='gl'?' selected':'')+'>'+esc(l.name)+'</option>').join('');
+  let h='<h1>Gästeliste</h1><p class="sub">Anlass «'+esc(e.name||'ohne Namen')+'»: auf den Listen <b>'+g.total+'</b> Personen · eingelassen <b>'+g.inn+'</b> · noch offen <b>'+g.open+'</b> · Member eingelassen <b>'+g.mIn+'</b></p>'+
+    '<label class="f" style="margin:0 0 12px"><span>Name suchen</span><input id="gSearch" type="text" value="'+esc(gSearch)+'" autocomplete="off" placeholder="Tippen zum Filtern"></label>'+
+    '<div id="glList">'+guestRows()+'</div>';
+  if(E().closed){
+    h+='<p class="note" style="margin-top:14px">Anlass abgeschlossen: Die Listen sind nicht mehr bearbeitbar.</p>';
+  } else if(isProd()){
+    h+='<div class="card" style="margin-top:14px"><h2>Listen dieses Anlasses</h2>'+
+      '<p class="hint">GL ist immer dabei. Mit einem Preis wird die Liste zur Preiskategorie an der Kasse. Ohne Preis ist sie gratis. Die Kategorie erscheint nur, solange noch Gäste offen sind.</p>'+
+      e.lists.map((l,i)=>{ const ppl=e.guests.filter(g=>g.list===l.id), n=ppl.reduce((s,g)=>s+g.n,0), inn=ppl.reduce((s,g)=>s+guestIn(g.id),0);
+        return '<div class="lrow"><label class="f"><span>Name</span><input data-path="ev.lists.'+i+'.name" type="text" value="'+esc(l.name)+'" autocomplete="off"'+(l.fixed?' disabled':lk('ev.'))+'></label>'+
+          '<label class="f"><span>Preis CHF (leer = gratis)</span><input data-path="ev.lists.'+i+'.price" inputmode="decimal" value="'+esc(l.price)+'" autocomplete="off"'+(l.fixed?' disabled':lk('ev.'))+'></label>'+
+          '<div class="hint">'+n+' Personen · '+inn+' eingelassen</div>'+
+          (l.fixed?'<span class="hint">Standardliste</span>':'<button class="ghost" data-dellist="'+l.id+'"'+((inn>0)?' disabled':'')+'>Entfernen</button>')+'</div>'; }).join('')+
+      '<h3>Neue Liste</h3><div class="fgrid"><label class="f"><span>Name der Liste</span><input id="lName" type="text" autocomplete="off" placeholder="z. B. Friendsliste"></label>'+
+      '<label class="f"><span>Preis CHF (optional)</span><input id="lPrice" inputmode="decimal" autocomplete="off" placeholder="leer = gratis"></label></div>'+
+      '<div class="err" id="lErr" role="alert"></div><div class="btns"><button class="primary" data-act="addlist">Liste anlegen</button></div></div>';
+    h+='<div class="card"><h2>Gast zum Anlass «'+esc(e.name||'ohne Namen')+'» hinzufügen</h2>'+
+      (true?'<div class="fgrid"><label class="f"><span>Name</span><input id="gName" type="text" autocomplete="off"></label>'+
+      '<label class="f"><span>Anzahl Personen</span><input id="gN" inputmode="numeric" value="1"></label></div>'+
+      '<label class="f" style="margin-top:10px"><span>Von wem (über wen kommt die Person?)</span><input id="gVia" type="text" autocomplete="off" placeholder="z. B. Name der Band oder des DJs"></label>'+
+      '<label class="f" style="margin-top:10px"><span>Liste</span><select id="gList">'+opts+'</select></label>'+
+      '<div class="err" id="gErr" role="alert"></div><div class="btns"><button class="primary" data-act="addguest">Hinzufügen</button></div>':'')+'</div>'+
+    (true?'<div class="card"><details><summary style="margin:0;color:var(--ink);font-weight:700">Liste für diesen Anlass einfügen</summary>'+
+      '<p class="hint" style="margin-top:8px">Ein Name pro Zeile. «Name +2» heisst: Person plus 2 Begleitungen. Mit Semikolon oder Tab gibst du an, über wen die Person kommt: «Name +2; Von». Auch aus einer Tabelle kopierbar (Name, Anzahl, Von).</p>'+
+      '<textarea id="gImp" aria-label="Liste einfügen"></textarea>'+
+      '<label class="f" style="margin-top:10px"><span>Liste</span><select id="gImpList">'+opts+'</select></label>'+
+      '<div class="err" id="gImpErr" role="alert"></div><div class="btns"><button class="primary" data-act="importguests">Einfügen</button></div></details></div>':'');
+  } else {
+    h+='<p class="note" style="margin-top:14px">Listen erfassen kann die Produktion, die Mitgliederliste nur der Admin. An der Kasse wird nur eingelassen.</p>';
+  }
+  if(isAdmin()){
+    h+='<div class="card"><h2>Mitgliederliste (gilt für alle Anlässe)</h2><p class="hint">'+S.members.length+' Mitglieder. Nur der Admin kann sie ändern.</p>'+
+      '<div class="fgrid"><label class="f" style="grid-column:1 / -1"><span>Name</span><input id="mName" type="text" autocomplete="off"></label></div>'+
+      '<div class="err" id="mErr" role="alert"></div><div class="btns"><button class="primary" data-act="addmember">Mitglied hinzufügen</button></div>'+
+      '<details style="margin-top:12px"><summary style="margin:0;color:var(--ink);font-weight:700">Mitglieder einfügen</summary><p class="hint" style="margin-top:8px">Ein Name pro Zeile.</p>'+
+      '<textarea id="mImp" aria-label="Mitglieder einfügen"></textarea><div class="err" id="mImpErr" role="alert"></div><div class="btns"><button class="primary" data-act="importmembers">Einfügen</button></div></details></div>';
+  }
+  return h;
+}
+function parseImport(txt){
+  return txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>{
+    const parts=l.split(/\t|;|\|/).map(x=>x.trim()).filter((x,i)=>i===0||x!=='');
+    let name=parts[0], n=1, via='';
+    const m=name.match(/^(.*?)\s*\+\s*(\d+)$/); if(m){ name=m[1].trim(); n=1+parseInt(m[2],10); }
+    parts.slice(1).forEach(p=>{ if(/^\d+$/.test(p)){ const k=parseInt(p,10); if(k>=1) n=k; } else via=via?via+' '+p:p; });
+    return {name:name,n:n,via:via};
+  }).filter(x=>x.name);
+}
+function addGuests(arr,listId){
+  if(blocked()) return 0;
+  const l=listById(listId); if(!l) return 0;
+  arr.forEach(x=>E().guests.push({id:uid(),name:x.name,n:x.n,via:x.via||'',list:l.id}));
+  save(); return arr.length;
+}
+function addMembers(arr){ arr.forEach(x=>S.members.push({id:'m'+uid(),name:x.name})); save(); return arr.length; }
+
+function viewGard(){
+  const side=(p,title,price)=>'<div class="card"><h2>'+title+' ('+price+'.–)</h2><div class="fgrid">'+
+    inp('ev.gard.'+p+'First','Erste Marke',{mode:'numeric'})+inp('ev.gard.'+p+'Last','Letzte Marke',{mode:'numeric'})+
+    inp('ev.gard.'+p+'Manual','oder Anzahl direkt',{mode:'numeric'})+inp('ev.gard.'+p+'Free','davon ohne Bezahlung',{mode:'numeric'})+'</div></div>';
+  const gd=gardData();
+  return '<h1>Garderobe</h1>'+side('j','Jacken',PRICE_JACKE)+side('t','Taschen',PRICE_TASCHE)+
+    '<p class="hint">Falls Marken im Lauf des Abends wiederverwendet werden, trage die Anzahl direkt ein.</p>'+
+    '<div class="card"><h2>Umsatz laut Marken</h2><div data-calc="gard-soll"></div><p class="hint" style="margin:8px 0 0">Der Abgleich mit dem Bargeld erfolgt im Tab Abschluss (Produktion).</p></div>';
+}
+function countsInputs(base,pfx,big){
+  const noten=NOTEN.filter(n=>big||n.stock);
+  return '<h3>Münz</h3><div class="fgrid">'+inp(base+'.'+pfx+'_m','Münz lose CHF')+'</div>'+
+    '<h3>Münzrollen (Anzahl)</h3><div class="fgrid">'+ROLLEN.map(r=>inp(base+'.'+pfx+'_'+r.k,r.short+' Rolle à '+r.val+'.–',{mode:'numeric'})).join('')+'</div>'+
+    '<h3>Noten (Anzahl)</h3><div class="fgrid3">'+noten.map(n=>inp(base+'.'+pfx+'_'+n.k,n.d+'.–',{mode:'numeric'})).join('')+'</div>';
+}
+function secDetails(key,title,calc,inner){
+  return '<details class="card sec" data-open="ab:'+key+'"'+(openState['ab:'+key]?' open':'')+'><summary><span>'+title+'</span><span class="sst" data-calc="'+calc+'"></span></summary>'+inner+'</details>';
+}
+function fmtDT(ts){ return new Date(ts).toLocaleString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function viewAb(){
+  const e=E();
+  const terms=e.terms.length?e.terms.map((t,i)=>'<div class="trow2"><div><b>Terminal Nr. '+esc(t.nr)+'</b><div class="hint">'+(t.use==='AK'?'Abendkasse':'Garderobe')+'</div></div>'+
+    '<label class="f"><span>Tagesabschluss CHF</span><input data-path="ev.terms.'+i+'.amt" inputmode="decimal" value="'+esc(t.amt)+'" autocomplete="off"'+lk('ev.')+'></label></div>').join(''):
+    '<p class="empty">Keine Terminals für diesen Anlass erfasst. Die Produktion wählt sie im Tab Anlass.</p>';
+  const closeCard=e.closed?
+    '<div class="card"><h2>Anlass abgeschlossen</h2><p class="hint">Abgeschlossen am '+fmtDT(e.closedAt||Date.now())+'. Es sind keine Änderungen mehr möglich.</p>'+
+      (isAdmin()?'<div class="btns"><button class="ghost" data-act="reopenevent">Anlass wieder öffnen</button></div>':'<p class="hint" style="margin:0">Wieder öffnen kann nur der Admin.</p>')+'</div>':
+    '<div class="card"><h2>Anlass abschliessen</h2><p class="hint">Danach kann an diesem Anlass nichts mehr geändert werden (Buchungen, Listen, Preise, Zählungen). Nur der Admin kann ihn wieder öffnen.</p>'+
+      '<div class="btns"><button class="danger" data-act="closeevent">Anlass abschliessen</button></div></div>';
+  return '<h1>Abschluss</h1><div data-calc="ab-status"></div>'+
+    secDetails('ak','Abendkasse','sum-ak','<p class="hint">Alles, was aus der Kasse zurückkommt. Zurück in den Tresor können auch 200er und 100er.</p>'+countsInputs('ev.ab','e',true)+'<p class="sub" style="margin:10px 0 0" data-calc="end-ak"></p>'+
+      '<div style="margin-top:12px" data-calc="ab-ak"></div>')+
+    secDetails('gard','Garderobe','sum-gard',countsInputs('ev.gard','e',true)+'<p class="sub" style="margin:10px 0 0" data-calc="end-gard"></p><div style="margin-top:12px" data-calc="ab-gard"></div>')+
+    secDetails('term','Tagesabschluss der Terminals','sum-term',terms)+
+    secDetails('misc','Gutscheine und VVK','sum-misc','<div class="fgrid">'+inp('ev.ab.gutscheine','Gutscheine eingezogen',{mode:'numeric'})+inp('ev.ab.vvkScan','VVK am Scanner eingelassen',{mode:'numeric'})+'</div><div style="margin-top:12px" data-calc="ab-misc"></div>')+
+    secDetails('form','Ins Formular eintragen','sum-form','<p class="hint">Blatt- und Zellenangaben stammen aus dem Abrechnungsformular.</p><div data-calc="form"></div><div class="btns"><button class="primary" data-act="copy">Als Text kopieren</button></div>')+
+    closeCard;
+}
+function viewEv(){
+  const used=E().plist.map(r=>r.cat);
+  const priceRows=E().plist.map((r,i)=>{
+    const c=S.cats.find(x=>x.id===r.cat)||{name:r.cat,kind:'paid'};
+    const opts=S.cats.filter(x=>x.kind!=='free'&&(x.active||x.id===r.cat));
+    return '<div class="prow2"><label class="f"><span>Kategorie</span><select data-path="ev.plist.'+i+'.cat"'+lk('ev.')+'>'+
+      opts.map(o=>'<option value="'+o.id+'"'+(o.id===r.cat?' selected':'')+((used.indexOf(o.id)>=0&&o.id!==r.cat)?' disabled':'')+'>'+esc(o.name)+'</option>').join('')+'</select></label>'+
+      '<label class="f"><span>Preis CHF'+(c.kind==='custom'?' (optional)':'')+'</span><input data-path="ev.plist.'+i+'.price" inputmode="decimal" value="'+esc(r.price)+'" autocomplete="off"'+lk('ev.')+'></label>'+
+      '<label class="chk"><input type="checkbox" data-path="ev.plist.'+i+'.on"'+(r.on!==false?' checked':'')+lk('ev.')+'> im Einsatz</label>'+
+      '<button class="ghost" data-delprice="'+i+'"'+lk('ev.')+'>Entfernen</button></div>';
+  }).join('');
+  const others=S.events.filter(x=>x.id!==curId);
+  let h='<h1>Anlass</h1>'+
+    '<div class="card"><h2>Dieser Anlass</h2><div class="fgrid">'+inp('ev.name','Name',{mode:'text'})+inp('ev.date','Datum',{type:'date'})+'</div></div>'+
+    '<div class="card"><h2>Preise für diesen Anlass</h2><div data-calc="price-status"></div>'+
+    '<p class="hint">Jeder Anlass hat eigene Preise. Wähle die Kategorie und trage den Preis ein. Jede Kategorie gibt es nur einmal. Gratis-Kategorien (GL, Member, Gutschein) brauchen keinen Preis. </p>'+
+    priceRows+
+    '<p class="hint" style="margin:8px 0 0">Preise von Listen (z. B. Friendsliste) legst du beim Anlegen der Liste im Tab Liste fest. Aktuell: '+E().lists.map(l=>esc(l.name)+' '+((num(l.price)>0)?'CHF '+chfs(num(l.price)):'gratis')).join(', ')+'.</p>'+
+    '<div class="btns"><button class="ghost" data-act="addprice"'+lk('ev.')+'>Preis hinzufügen</button><button class="ghost" data-act="addreduced"'+lk('ev.')+'>Reduzierten Preis hinzufügen</button></div>'+
+    '<p class="hint" style="margin:8px 0 0">Ein reduzierter Preis nummeriert sich automatisch (Reduziert 1, 2, 3). Dabei werden Normal und frühere reduzierte Preise deaktiviert.</p>'+
+    (others.length?'<div class="fgrid" style="margin-top:12px;align-items:end"><label class="f"><span>Preise übernehmen von</span><select id="copyFrom"'+lk('ev.')+'>'+others.map(x=>'<option value="'+x.id+'">'+esc((x.name||'ohne Namen')+' · '+dmy(x.date).slice(0,5))+'</option>').join('')+'</select></label><button class="ghost" data-act="copyprices"'+lk('ev.')+'>Übernehmen</button></div>':'')+'</div>'+
+    '<div class="card"><h2>Stock Abendkasse</h2><p class="hint">Was aus dem Tresor in die Kasse kommt. Aus dem Tresor gibt es nur 50er, 20er und 10er.</p>'+countsInputs('ev.ab','s',false)+'<p class="sub" style="margin:10px 0 0" data-calc="stock-ak"></p></div>'+
+    '<div class="card"><h2>Stock Garderobe</h2>'+countsInputs('ev.gard','s',false)+'<p class="sub" style="margin:10px 0 0" data-calc="stock-gard"></p></div>'+
+    '<div class="card"><h2>Kartenterminals</h2><p class="hint">Welche Terminals sind an diesem Anlass wo im Einsatz?</p>'+
+    E().terms.map((t,i)=>'<div class="trow3"><label class="f"><span>Terminalnummer</span><select data-path="ev.terms.'+i+'.nr"'+lk('ev.')+'>'+
+      TERM_NRS.map(n=>{ const used=E().terms.some((x,j)=>j!==i&&String(x.nr)===String(n)); return '<option value="'+n+'"'+(String(t.nr)===String(n)?' selected':'')+(used?' disabled':'')+'>Nr. '+n+'</option>'; }).join('')+'</select></label>'+
+      '<label class="f"><span>Wo im Einsatz</span><select data-path="ev.terms.'+i+'.use"'+lk('ev.')+'><option value="AK"'+(t.use==='AK'?' selected':'')+'>Abendkasse</option><option value="Garderobe"'+(t.use==='Garderobe'?' selected':'')+'>Garderobe</option></select></label>'+
+      '<button class="ghost" data-delterm="'+i+'"'+lk('ev.')+'>Entfernen</button></div>').join('')+
+    '<div class="btns"><button class="ghost" data-act="addterm"'+((E().terms.length>=TERM_NRS.length||E().closed)?' disabled':'')+'>Terminal hinzufügen</button></div></div>'+
+    '<div class="card"><h2>Anlässe verwalten</h2>'+
+    S.events.map(x=>{
+      const cur=x.id===curId, nb=x.nb, canDel=isAdmin()||(isProd()&&!nb&&!cartLen(x.id));
+      return '<div class="evrow"><div><b>'+esc(x.name||'ohne Namen')+'</b>'+(cur?' (aktuell)':'')+'<div class="hint">'+dmy(x.date)+' · '+nb+(nb===1?' Buchung':' Buchungen')+(x.closed?' · abgeschlossen':'')+'</div></div>'+
+        '<div class="evbtn">'+(cur?'':'<button class="ghost" data-evsel="'+x.id+'">Wählen</button>')+'<button class="danger" data-evdel="'+x.id+'"'+(canDel?'':' disabled')+'>Löschen</button></div></div>';
+    }).join('')+
+    '<div class="btns"><button class="primary" data-act="newevent">Neuen Anlass anlegen</button></div>';
+  if(!isAdmin()&&S.events.some(x=>x.nb>0)) h+='<p class="hint" style="margin:10px 0 0">Anlässe mit Buchungen kann nur der Admin löschen.</p>';
+  h+='</div>';
+  if(isAdmin()){
+    h+='<div class="card"><h2>Kategorien (Admin)</h2><p class="hint">Hier stehen die Kategorien an sich, ohne Preis. Preise und Einsatz legt die Produktion pro Anlass fest. Mit «Mitgliederliste» muss beim Kassieren eine Person gesucht werden. Listen für einen Anlass (GL, Friendsliste …) legt die Produktion im Tab Liste an.</p>'+
+    S.cats.map((c,i)=>'<div class="crow">'+
+      '<input data-ci="'+i+'" data-f="name" value="'+esc(c.name)+'" aria-label="Name" autocomplete="off">'+
+      '<div class="row2"><select data-ci="'+i+'" data-f="kind" aria-label="Art">'+
+        [['paid','Bezahlt'],['free','Gratis'],['custom','Betrag frei']].map(o=>'<option value="'+o[0]+'"'+(c.kind===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>'+
+      '<select data-ci="'+i+'" data-f="list" aria-label="Liste">'+
+        [['','Keine Liste'],['members','Mitgliederliste']].map(o=>'<option value="'+o[0]+'"'+((c.list||'')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>'+
+      '<label class="chk"><input type="checkbox" data-ci="'+i+'" data-f="active"'+(c.active?' checked':'')+'> verfügbar</label>'+
+      '<button class="ghost" data-act="delcat" data-i="'+i+'">Löschen</button></div></div>').join('')+
+    '<div class="btns"><button class="ghost" data-act="addcat">Kategorie hinzufügen</button></div></div>';
+  } else {
+    h+='<div class="card"><h2>Kategorien</h2><p class="hint">Nur der Admin ändert die Kategorien.</p></div>';
+  }
+  if(isAdmin()){
+    h+='<div class="card"><h2>Konten (Admin)</h2><p class="hint">Neue Konten legst du im Supabase-Dashboard unter Authentication an. Hier gibst du sie frei und setzt die Rolle.</p>'+
+      T.profiles.map((p,i)=>{ const self=me&&p.id===me.id;
+        return '<div class="crow"><div><b>'+esc(p.display_name||'(ohne Name)')+'</b>'+(self?' (du)':'')+'</div><div class="row2"><select data-pi="'+i+'" data-f="role" aria-label="Rolle"'+(self?' disabled':'')+'>'+
+          ['kasse','garderobe','produktion','admin'].map(r=>'<option value="'+r+'"'+(p.role===r?' selected':'')+'>'+DBROLE[r]+'</option>').join('')+'</select>'+
+          '<label class="chk"><input type="checkbox" data-pi="'+i+'" data-f="active"'+(p.active?' checked':'')+(self?' disabled':'')+'> freigegeben</label></div></div>'; }).join('')+'</div>';
+  }
+  return h;
+}
+const VIEWS={einlass:viewEinlass,gl:viewGl,gard:viewGard,ab:viewAb,ev:viewEv};
+
+function closedBanner(){
+  return '<div class="note closedbar"><span><b>Anlass abgeschlossen</b> am '+fmtDT(E().closedAt||Date.now())+'. Keine Änderungen mehr möglich.</span>'+(isAdmin()?'<button class="ghost" data-act="reopenevent">Wieder öffnen</button>':'')+'</div>';
+}
+function summarize(items){
+  const its=items.filter(i=>!i.info), bad=its.filter(i=>i.cls==='bad').length, open=its.filter(i=>i.cls==='open').length;
+  if(bad) return {cls:'bad',text:'! '+bad+(bad===1?' Differenz':' Differenzen')};
+  if(open) return {cls:'open',text:open+' offen'};
+  return {cls:'ok',text:'✓ stimmt'};
+}
+function sumInfo(k,ad){
+  if(k==='sum-ak') return summarize(ad.ak);
+  if(k==='sum-gard') return summarize(ad.gard);
+  if(k==='sum-misc') return summarize(ad.misc);
+  if(k==='sum-term'){ if(!E().terms.length) return {cls:'open',text:'keine Terminals'}; const m=termsMissing().length; return m?{cls:'open',text:m+' offen'}:{cls:'ok',text:'✓ erfasst'}; }
+  return {cls:'',text:''};
+}
+function renderNav(){
+  const nav=$('nav');
+  if(!role){ nav.innerHTML=''; return; }
+  nav.innerHTML=TABS[role].map(t=>'<button data-tab="'+t+'"'+(t===tab?' aria-current="page"':'')+'>'+TAB_LABEL[t]+(t==='ab'?'<span class="badge" id="abBadge" hidden></span>':'')+'</button>').join('');
+}
+function configHtml(){
+  return '<h1>Verbindung einrichten</h1><p class="hint">Trage die Daten deines Supabase-Projekts ein (Project Settings, API). Es wird nur der Schlüssel «anon public» gebraucht, niemals «service_role».</p>'+
+    '<label class="f"><span>Projekt-URL</span><input id="cfgUrl" type="text" placeholder="https://xxxx.supabase.co" autocomplete="off"></label>'+
+    '<label class="f" style="margin-top:10px"><span>anon public key</span><input id="cfgKey" type="text" autocomplete="off"></label>'+
+    '<div class="err" id="cfgErr" role="alert"></div><div class="btns"><button class="primary" data-act="saveconfig">Speichern und starten</button></div>';
+}
+function loginHtml(){
+  return '<h1>Anmelden</h1><label class="f"><span>E-Mail</span><input id="lgMail" type="email" autocomplete="username"></label>'+
+    '<label class="f" style="margin-top:10px"><span>Passwort</span><input id="lgPw" type="password" autocomplete="current-password"></label>'+
+    '<div class="err" id="lgErr" role="alert"></div><div class="btns"><button class="primary" data-act="login">Anmelden</button></div>'+
+    '<p class="hint" style="margin-top:14px"><button class="link" data-act="resetconfig">Server ändern</button></p>';
+}
+function waitingHtml(){
+  return '<h1>Konto noch nicht freigegeben</h1><p>Dein Konto'+(me&&me.email?' ('+esc(me.email)+')':'')+' ist angelegt. Ein Admin muss es freigeben und dir eine Rolle geben.</p>'+
+    '<div class="btns"><button class="primary" data-act="recheck">Nochmals prüfen</button><button class="ghost" data-act="logout">Abmelden</button></div>';
+}
+function errorHtml(){
+  return '<h1>Das hat nicht geklappt</h1><p>'+esc(bootMsg)+'</p><div class="btns"><button class="primary" data-act="recheck">Nochmals versuchen</button></div>'+
+    '<div class="btns"><button class="ghost" data-act="logout">Abmelden</button><button class="ghost" data-act="resetconfig">Server ändern</button></div>';
+}
+function noEventHtml(){
+  return '<h1>Kein Anlass</h1>'+(isProd()?'<p>Es gibt noch keinen Anlass. Lege den ersten an.</p><div class="btns"><button class="primary" data-act="newevent">Neuen Anlass anlegen</button></div>':'<p class="hint">Es ist noch kein Anlass angelegt. Die Produktion legt ihn an.</p>');
+}
+function renderBoot(){
+  $('nav').innerHTML=''; $('#cartbar').hidden=true; $('#cartbar').innerHTML=''; $('#app').classList.remove('hasbar');
+  $('#app').innerHTML = boot==='config'?configHtml(): boot==='login'?loginHtml(): boot==='waiting'?waitingHtml(): boot==='error'?errorHtml(): '<p class="empty">Wird geladen …</p>';
+}
+function render(keepScroll){
+  if(boot!=='ready'){ renderBoot(); return; }
+  if(TABS[role].indexOf(tab)<0) tab=TABS[role][0];
+  const y=window.scrollY, e=E();
+  $('#app').innerHTML=topbar()+(e.none?noEventHtml():((e.closed?closedBanner():'')+VIEWS[tab]()));
+  renderNav(); renderCartBar(); if(!e.none) recompute();
+  window.scrollTo(0,keepScroll?y:0);
+}
+function recompute(){
+  const ad=abschlussData(), gd=gardData(), a=E().ab, g=E().gard;
+  const aS=parts(a,'s'), aE=parts(a,'e'), gS=parts(g,'s'), gE=parts(g,'e');
+  const missing=S.cats.filter(priceMissing);
+  document.querySelectorAll('[data-calc]').forEach(el=>{
+    const k=el.dataset.calc;
+    if(k.indexOf('sum-')===0){ const si=sumInfo(k,ad); el.className='sst '+si.cls; el.textContent=si.text; return; }
+    el.innerHTML = k==='gard-soll'?renderItems(gd.items.slice(0,2)).concat('<div class="cmp info"><div class="cl">Umsatz laut Marken</div><div class="cn2"><b>CHF '+chf(gd.soll)+'</b></div></div>')
+      : k==='ab-ak'?renderItems(ad.ak) : k==='ab-gard'?renderItems(ad.gard) : k==='ab-misc'?renderItems(ad.misc)
+      : k==='ab-status'?statusHtml(ad) : k==='form'?formHtml()
+      : k==='stock-ak'?'Stock: '+fmtBreak(aS) : k==='stock-gard'?'Stock: '+fmtBreak(gS)
+      : k==='end-ak'?'Endbestand: '+fmtBreak(aE)+'<br>Stock war: <b>'+fmtTot(aS)+'</b>' : k==='end-gard'?'Endbestand: '+fmtBreak(gE)+'<br>Stock war: <b>'+fmtTot(gS)+'</b>'
+      : k==='price-status'?(missing.length?'<div class="status bad" role="status">! Preis fehlt: '+missing.map(c=>esc(c.name)).join(', ')+'</div>':(E().plist.length?'<div class="status ok" role="status">✓ Alle Preise erfasst</div>':'<div class="status bad" role="status">! Noch keine Preise erfasst</div>')) : '';
+  });
+  const bad=allItems(ad).filter(i=>i.cls==='bad').length, b=$('#abBadge');
+  if(b){ if(bad){ b.textContent=bad; b.hidden=false; b.setAttribute('aria-label',bad+' Differenzen'); } else b.hidden=true; }
+}
+
+/* ---------- Formular-Übertrag ---------- */
+function blockRows(o,pfx,col,big){
+  const any=parts(o,pfx).total!=null;
+  const val=k=>{ const c=num(o[pfx+'_'+k]); return any?String(c==null?0:c):'–'; };
+  const rows=[];
+  NOTEN.filter(n=>big||n.stock).forEach(n=>rows.push([n.d+'.– Anzahl ('+col+n.row+')',val(n.k)]));
+  ROLLEN.forEach(r=>rows.push([r.short+' Rolle, Anzahl ('+col+r.row+')',val(r.k)]));
+  return rows;
+}
+function formData(){
+  const e=E(), a=e.ab, g=e.gard, ad=abschlussData(), st=stats(), money=v=>v==null?'–':'CHF '+chf(v);
+  const aS=parts(a,'s'), aE=parts(a,'e'), gS=parts(g,'s'), gE=parts(g,'e');
+  const mm=(p,k)=>p.total==null?'–':money(p[k]||0);
+  const tAK=termSum('AK'), tG=termSum('Garderobe');
+  const bar=(aS.total!=null&&aE.total!=null)?round2(aE.total-aS.total):null, gCash=(gS.total!=null&&gE.total!=null)?round2(gE.total-gS.total):null;
+  const sec=[];
+  sec.push({title:'Blatt Umsatzentwicklung: Kopf',rows:[['E1 Anlassname',e.name||'–'],['N1 Datum',dmy(e.date)||'–']]});
+  const trows=e.terms.map(t=>['101523_'+t.nr+' · verwendet an '+(t.use==='AK'?'AK':'Garderobe'),num(t.amt)!=null?money(num(t.amt)):'Tagesabschluss fehlt']);
+  sec.push({title:'Kartenterminals (Tabelle ab Zeile 31)',rows:trows.length?trows:[['Keine Terminals erfasst','']]});
+  sec.push({title:'Münz lose (Blatt Umsatzentwicklung, in CHF)',rows:[
+    ['Münz blau Anfang (N7)',mm(aS,'m')],['Münz blau Ende (M7)',mm(aE,'m')],
+    ['Münz rot Anfang (N17)',mm(gS,'m')],['Münz rot Ende (M17)',mm(gE,'m')]]});
+  sec.push({title:'Abendkasse Anfang: Blatt TresorBar, Block AK',rows:blockRows(a,'s','F',false)});
+  sec.push({title:'Abendkasse Ende: Blatt BarTresor, Block AK',rows:blockRows(a,'e','F',true)});
+  sec.push({title:'Garderobe Anfang: Blatt TresorBar, Block Garderobe',rows:blockRows(g,'s','J',false)});
+  sec.push({title:'Garderobe Ende: Blatt BarTresor, Block Garderobe',rows:blockRows(g,'e','J',true)});
+  sec.push({title:'Kontrolle der Summen (Blatt Umsatzentwicklung, Anfang / Ende)',rows:[
+    ['Noten AK (N8 / M8)',mm(aS,'noten')+' / '+mm(aE,'noten')],
+    ['Rollen AK (N9 / M9)',mm(aS,'rolls')+' / '+mm(aE,'rolls')],
+    ['Noten Garderobe (N18 / M18)',mm(gS,'noten')+' / '+mm(gE,'noten')],
+    ['Rollen Garderobe (N19 / M19)',mm(gS,'rolls')+' / '+mm(gE,'rolls')]]});
+  sec.push({title:'Kontrolle: das muss danach im Formular stehen (ohne Quittungen)',rows:[
+    ['Umsatz Cash AK (N27)',money(bar)],
+    ['Umsatz Cash Garderobe (N28)',money(gCash)],
+    ['Digital AK (C37)',tAK.any?money(tAK.sum):'–'],
+    ['Digital Garderobe (C38)',tG.any?money(tG.sum):'–'],
+    ['Umsatz Total AK (C27)',bar!=null?money(round2(bar+tAK.sum)):'–'],
+    ['Umsatz Total Garderobe (C28)',gCash!=null?money(round2(gCash+tG.sum)):'–']]});
+  const diffs=[];
+  [['Abendkasse',ad.ak],['Garderobe',ad.gard],['Weiteres',ad.misc]].forEach(x=>x[1].forEach(i=>{ if(!i.info&&i.cls==='bad') diffs.push([x[0]+': '+i.label,i.status.replace(/^! /,'')]); }));
+  const vvk=num(a.vvkScan);
+  const cats=Object.keys(st.byName).filter(n=>st.byName[n]!==0).map(n=>n+' '+st.byName[n]).join(', ');
+  sec.push({title:'Blatt Rückmeldeblatt',rows:[
+    ['A5 Anz. Besuchende',vvk==null?st.n+' an der Abendkasse (VVK offen)':(st.n+vvk)+' ('+st.n+' Abendkasse + '+vvk+' VVK)'],
+    ['Eintritte nach Kategorie',cats||'–'],
+    ['A34 Kasse/Garderobe',diffs.length?diffs.map(d=>d[0]+' '+d[1]).join('; '):'keine Differenzen']]});
+  sec.push({title:'Differenzen',rows:diffs.length?diffs:[['Keine festgestellt','']]});
+  return sec;
+}
+function formHtml(){
+  return formData().map(sec=>'<div class="fsec"><h3>'+esc(sec.title)+'</h3>'+sec.rows.map(r=>'<div class="fr"><span>'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>').join('')+'</div>').join('');
+}
+function summaryText(){
+  const e=E(), L=['Fürs Formular – '+(e.name||'Anlass')+', '+dmy(e.date)];
+  formData().forEach(sec=>{ L.push('',sec.title); sec.rows.forEach(r=>L.push('  '+r[0]+(r[1]!==''?': '+r[1]:''))); });
+  return L.join('\n');
+}
+let toastTimer=null;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>{t.hidden=true;},2200); }
+function copyText(txt){
+  const fallback=()=>{ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); toast(ok?'Kopiert':'Kopieren nicht möglich'); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(()=>toast('Kopiert'),fallback); } else fallback();
+}
+
+/* ---------- Sheets ---------- */
+const sheet=$('#sheet');
+let search=null;
+function closeSheet(){ sheet.hidden=true; sheet.innerHTML=''; search=null; }
+function openSheet(cat){
+  sheet.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(cat.name)+'"><h2>'+esc(cat.name)+'</h2>'+
+    '<p class="hint">Kommt in den Warenkorb. Die Zahlart wählst du beim Einkassieren.</p><div class="fgrid">'+
+    '<label class="f"><span>Anzahl Personen</span><input id="shQty" inputmode="numeric" value="1"></label>'+
+    '<label class="f"><span>Betrag total CHF</span><input id="shAmt" inputmode="decimal"'+(priceOf(cat)?' placeholder="Richtpreis '+chfs(priceOf(cat))+' pro Person"':'')+'></label></div>'+
+    '<div class="err" id="shErr" role="alert"></div>'+
+    '<div class="btns"><button class="ghost" data-sh="cancel">Abbrechen</button><button class="primary" data-sh="ok" data-id="'+cat.id+'">In den Warenkorb</button></div></div>';
+  sheet.hidden=false; setTimeout(()=>{ const a=$('#shAmt'); if(a) a.focus(); },30);
+}
+function searchList(){
+  const cat=findCat(search.catId); if(!cat) return '';
+  const q=norm(search.q.trim());
+  const all=peopleFor(cat);
+  if(!all.length) return '<p class="empty">'+(cat.list==='members'?'Die Mitgliederliste ist leer. Der Admin pflegt sie im Tab Liste.':'Für diesen Anlass ist noch niemand auf dieser Liste. Die Produktion erfasst sie im Tab Liste.')+'</p>';
+  const list=all.filter(g=>!q||norm(g.name+' '+(g.via||'')).indexOf(q)>=0).sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  if(!list.length) return '<p class="empty">Kein Treffer für «'+esc(search.q)+'».</p>';
+  return '<ul class="sl">'+list.slice(0,40).map(g=>{
+    const inn=guestIn(g.id), inc=guestInCart(g.id), rem=g.n-inn-inc;
+    return '<li><div class="sn"><b>'+esc(g.name)+'</b><small>'+(g.via?'über '+esc(g.via)+' · ':'')+inn+' / '+g.n+' eingelassen'+(inc?' · '+inc+' im Warenkorb':'')+'</small></div>'+
+      (rem>0?'<button class="primary" data-sadd="'+g.id+'">Hinzufügen</button>':'<button class="ghost" disabled>'+(inc?'Im Warenkorb':'Komplett')+'</button>')+'</li>';
+  }).join('')+'</ul>'+(list.length>40?'<p class="hint">Nur die ersten 40 Treffer. Weiter tippen, um einzugrenzen.</p>':'');
+}
+function openSearch(cat){
+  search={catId:cat.id,q:''};
+  sheet.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="Person suchen"><h2>'+esc(cat.name)+': Person suchen</h2>'+
+    '<label class="f"><span>Name</span><input id="sq" type="text" autocomplete="off"></label><div id="sl">'+searchList()+'</div>'+
+    '<div class="btns"><button class="primary" data-sh="done">Fertig</button></div></div>';
+  sheet.hidden=false; setTimeout(()=>{ const a=$('#sq'); if(a) a.focus(); },30);
+}
+function openAccount(){
+  sheet.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="Konto"><h2>Konto</h2>'+
+    '<p><b>'+esc((profile&&profile.display_name)||(me&&me.email)||'')+'</b><br><span class="hint">'+esc((me&&me.email)||'')+' · Rolle '+ROLES[role]+'</span></p>'+
+    '<p class="hint">Server: '+esc((cfg().url||'').replace(/^https?:\/\//,''))+'<br>Gerät: '+esc(DEVICE)+'</p>'+
+    '<div class="btns"><button class="ghost" data-sh="logout">Abmelden</button><button class="ghost" data-sh="cancel">Schliessen</button></div></div>';
+  sheet.hidden=false;
+}
+function openOutbox(){
+  const rows=outbox.map(o=>{
+    const what=o.kind==='checkout'?(o.view||[]).map(v=>v.qty+'× '+esc(v.name)+(v.who?' ('+esc(v.who)+')':'')).join(', '):'Storno einer Buchung';
+    const t=new Date(o.ts).toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'});
+    return '<li><div class="sn"><b>'+t+' · '+what+'</b><small>'+(o.failed?'Abgelehnt: '+esc(o.error||''):'Wartet auf Verbindung')+'</small></div>'+
+      (o.failed?'<button class="ghost" data-ob="retry" data-id="'+o.id+'">Nochmals</button><button class="danger" data-ob="drop" data-id="'+o.id+'">Verwerfen</button>':'')+'</li>';
+  }).join('');
+  sheet.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="Wartende Buchungen"><h2>Wartende Buchungen</h2>'+
+    '<p class="hint">Diese Buchungen sind auf diesem Gerät gespeichert und werden gesendet, sobald eine Verbindung da ist. Abgelehnte hat der Server nicht angenommen (zum Beispiel weil sich ein Preis geändert hat oder der Anlass abgeschlossen wurde). «Verwerfen» heisst: Sie werden nicht erfasst. Die Person war dann eventuell schon eingelassen, bitte die Produktion informieren.</p>'+
+    (rows?'<ul class="sl">'+rows+'</ul>':'<p class="empty">Nichts wartet.</p>')+
+    '<div class="btns"><button class="primary" data-sh="done">Schliessen</button></div></div>';
+  sheet.hidden=false;
+}
+sheet.addEventListener('click',e=>{
+  if(e.target===sheet){ closeSheet(); return; }
+  const o=e.target.closest('[data-ob]');
+  if(o){
+    const it=outbox.find(x=>x.id===o.dataset.id); if(!it) return;
+    if(o.dataset.ob==='retry'){ it.failed=false; delete it.error; saveOutbox(); flush(); }
+    else { outbox=outbox.filter(x=>x!==it); saveOutbox(); }
+    mark(); openOutbox(); return;
+  }
+  const a=e.target.closest('[data-sadd]');
+  if(a){
+    const cat=findCat(search.catId), g=peopleFor(cat).find(x=>x.id===a.dataset.sadd);
+    if(g) cartAddGuest(g);
+    $('#sl').innerHTML=searchList(); render(true); return;
+  }
+  const b=e.target.closest('[data-sh]'); if(!b) return;
+  if(b.dataset.sh==='cancel'||b.dataset.sh==='done'){ closeSheet(); return; }
+  if(b.dataset.sh==='logout'){ closeSheet(); doLogout(); return; }
+  if(b.dataset.sh==='ok'){
+    const cat=findCat(b.dataset.id), q=num($('#shQty').value), am=num($('#shAmt').value);
+    if(q==null||q<1||!Number.isInteger(q)){ $('#shErr').textContent='Anzahl als ganze Zahl eintragen.'; return; }
+    if(am==null||am<0){ $('#shErr').textContent='Betrag eintragen (0 ist erlaubt).'; return; }
+    closeSheet(); cartAddCustom(cat,q,round2(am));
+  }
+});
+sheet.addEventListener('input',e=>{ if(e.target.id==='sq'&&search){ search.q=e.target.value; $('#sl').innerHTML=searchList(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!sheet.hidden) closeSheet(); });
+
+/* ---------- Ereignisse ---------- */
+let armed = null, armTimer = null;
+function confirmTap(t, key, fn, ask){
+  if (armed === key) { clearTimeout(armTimer); armed = null; fn(); return; }
+  armed = key; const old = t.textContent; t.textContent = ask; clearTimeout(armTimer);
+  armTimer = setTimeout(() => { armed = null; if (document.body.contains(t)) t.textContent = old; }, 4000);
+}
+function denied(){ toast('Dafür fehlt dir die Berechtigung'); }
+
+async function addGuestsServer(arr, listId){
+  if (blocked()) return 0;
+  const rows = arr.map(x => ({ event_id: curId, list_id: listId, name: x.name, party_size: x.n, via: x.via || '' }));
+  const res = await writeRows('list_guests', sb.from('list_guests').insert(rows).select());
+  return res ? res.length : 0;
+}
+async function addMembersServer(arr){
+  const res = await writeRows('members', sb.from('members').insert(arr.map(x => ({ name: x.name }))).select());
+  return res ? res.length : 0;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target && e.target.id === 'lgPw') doLogin();
+});
+
+$('#app').addEventListener('click', async e => {
+  const t = e.target.closest('button'); if (!t) return;
+  const d = t.dataset;
+  /* Start- und Anmeldebildschirme */
+  if (d.act === 'login') return doLogin();
+  if (d.act === 'saveconfig') {
+    const url = ($('#cfgUrl').value || '').trim().replace(/\/+$/, ''), key = ($('#cfgKey').value || '').trim();
+    if (!/^https?:\/\//.test(url) || key.length < 20) { $('#cfgErr').textContent = 'Bitte die Projekt-URL und den anon-Schlüssel eintragen.'; return; }
+    try { localStorage.setItem(CFG_KEY, JSON.stringify({ url: url, anonKey: key })); } catch(e2) {}
+    return start();
+  }
+  if (d.act === 'resetconfig') { try { localStorage.removeItem(CFG_KEY); } catch(e2) {} boot = 'config'; return render(); }
+  if (d.act === 'recheck') return start();
+  if (d.act === 'logout') return doLogout();
+  if (boot !== 'ready') return;
+
+  if (d.cat) { const c = findCat(d.cat); if (c) cartAdd(c); }
+  else if (d.storno) {
+    if (outbox.some(o => o.kind === 'storno' && o.original === d.storno)) return;
+    if (blocked()) return;
+    enqueue({ kind: 'storno', id: uuid(), event: curId, original: d.storno, ts: Date.now() });
+  }
+  else if (d.cinc) { cartChange(d.cinc, 1); }
+  else if (d.cdec) { cartChange(d.cdec, -1); }
+  else if (d.cdel) { cartChange(d.cdel, -1); }
+  else if (d.gin) {
+    const g = allGuests().find(x => x.id === d.gin); if (!g) return;
+    const rem = g.n - guestIn(g.id) - guestInCart(g.id); if (rem <= 0) { toast('Komplett eingelassen oder schon im Warenkorb'); return; }
+    const cat = catOf(g);
+    if (cat.kind === 'free' && !guestInCart(g.id)) bookDirect(cat, g);
+    else if (cartAddGuest(g)) { render(true); toast(g.name + ' liegt im Warenkorb (Tab Einlass)'); }
+  }
+  else if (d.gout) {
+    const last = E().entries.slice().reverse().find(x => x.guest === d.gout && !x.voided && !x.stornoOf);
+    if (!last) return;
+    if (E().entries.filter(x => x.tx === last.tx && !x.stornoOf).length > 1) { toast('Diese Buchung enthält weitere Einträge. Bitte im Einlass-Log stornieren.'); return; }
+    if (blocked()) return;
+    enqueue({ kind: 'storno', id: uuid(), event: curId, original: last.tx, ts: Date.now() });
+  }
+  else if (d.gplus) {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const g = T.guests.find(x => x.id === d.gplus); if (!g) return;
+    writeRows('list_guests', sb.from('list_guests').update({ party_size: g.party_size + 1 }).eq('id', g.id).select());
+  }
+  else if (d.gdel) {
+    const isM = T.members.some(m => m.id === d.gdel);
+    if (isM) { if (!isAdmin()) return denied(); writeRows('members', sb.from('members').update({ active: false }).eq('id', d.gdel).select()); }
+    else { if (!isProd()) return denied(); if (blocked()) return; deleteRows('list_guests', sb.from('list_guests').delete().eq('id', d.gdel).select(), { id: d.gdel }); }
+  }
+  else if (d.delterm) {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const row = termRows()[+d.delterm]; if (!row) return;
+    deleteRows('event_terminals', sb.from('event_terminals').delete().match({ event_id: curId, terminal_nr: row.terminal_nr }).select(), row);
+  }
+  else if (d.delprice) {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const row = priceRows()[+d.delprice]; if (!row) return;
+    deleteRows('event_prices', sb.from('event_prices').delete().match({ event_id: curId, category_id: row.category_id }).select(), row);
+  }
+  else if (d.act === 'role') { openAccount(); }
+  else if (d.act === 'outbox') { openOutbox(); }
+  else if (d.act === 'copy') { copyText(summaryText()); }
+  else if (d.act === 'addterm') {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const used = E().terms.map(x => String(x.nr)), free = TERM_NRS.filter(n => used.indexOf(String(n)) < 0);
+    if (!free.length) { toast('Alle Terminals sind vergeben'); return; }
+    writeRows('event_terminals', sb.from('event_terminals').insert({ event_id: curId, terminal_nr: free[0], used_at: 'AK' }).select());
+  }
+  else if (d.act === 'addprice') {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const used = E().plist.map(r => r.cat), c = S.cats.find(x => x.kind !== 'free' && x.active && !x.reduced && used.indexOf(x.id) < 0);
+    if (!c) { toast('Alle Kategorien sind schon eingetragen. Für reduzierte Preise gibt es den eigenen Knopf.'); return; }
+    writeRows('event_prices', sb.from('event_prices').insert({ event_id: curId, category_id: c.id, price: null, active: true }).select());
+  }
+  else if (d.act === 'addreduced') {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const r = await run(sb.rpc('add_reduced_price', { p_event: curId, p_price: null }));
+    if (r !== null) { await reloadPrices(); toast('Reduzierte Stufe angelegt. Normal und frühere reduzierte Preise sind jetzt deaktiviert.'); }
+  }
+  else if (d.act === 'copyprices') {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const from = $('#copyFrom').value; if (!from) return;
+    const src = await run(sb.from('event_prices').select('*').eq('event_id', from)); if (!src) return;
+    const del = await run(sb.from('event_prices').delete().eq('event_id', curId).select()); if (!del) return;
+    if (src.length) await run(sb.from('event_prices').insert(src.map(r => ({ event_id: curId, category_id: r.category_id, price: r.price, active: r.active })))) ;
+    await reloadPrices(); toast('Preise übernommen. Bitte kurz prüfen.');
+  }
+  else if (d.act === 'addcat') { if (!isAdmin()) return denied(); writeRows('categories', sb.from('categories').insert({ id: 'c' + uid(), name: 'Neue Kategorie', kind: 'paid', sort: 200 }).select()); }
+  else if (d.act === 'delcat') {
+    if (!isAdmin()) return denied();
+    const c = T.cats[+d.i]; if (!c) return;
+    confirmTap(t, 'delcat' + c.id, () => deleteRows('categories', sb.from('categories').delete().eq('id', c.id).select(), c), 'Sicher? Nochmals tippen');
+  }
+  else if (d.act === 'newevent') {
+    if (!isProd()) return denied();
+    const rows = await run(sb.from('events').insert({ name: 'Neuer Anlass', event_date: today() }).select());
+    if (rows && rows[0]) { upsertLocal('events', rows[0]); await loadStatic(); syncS(); await selectEvent(rows[0].id); render(); toast('Anlass angelegt. Bitte Namen, Preise, Stock und Terminals eintragen.'); }
+  }
+  else if (d.evsel) { await selectEvent(d.evsel); render(); }
+  else if (d.evdel) {
+    const ev = S.events.find(x => x.id === d.evdel); if (!ev) return;
+    if (!(isAdmin() || (isProd() && !ev.nb && !cartLen(ev.id)))) return denied();
+    confirmTap(t, 'evdel' + ev.id, async () => {
+      const r = await run(sb.from('events').delete().eq('id', ev.id).select());
+      if (r === null) return;
+      if (!r.length) { toast('Der Anlass konnte nicht gelöscht werden (Berechtigung).'); return; }
+      T.events = T.events.filter(x => x.id !== ev.id); syncS();
+      if (curId === ev.id) { curId = pickEvent(); if (curId) await selectEvent(curId); else { stopRealtime(); mark(); } }
+      render(true); toast('Anlass gelöscht');
+    }, 'Sicher? Nochmals tippen');
+  }
+  else if (d.range !== undefined) {
+    const mins = +d.range;
+    if (!mins) { rFrom = ''; rTo = ''; }
+    else { const now = new Date(), from = new Date(now.getTime() - mins * 60000); rFrom = pad2(from.getHours()) + ':' + pad2(from.getMinutes()); rTo = pad2(now.getHours()) + ':' + pad2(now.getMinutes()); }
+    $('#rFrom').value = rFrom; $('#rTo').value = rTo; $('#rangeOut').innerHTML = rangeHtml();
+  }
+  else if (d.act === 'addlist') {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const name = ($('#lName').value || '').trim(), ptxt = ($('#lPrice').value || '').trim(), pr = num(ptxt);
+    if (!name) { $('#lErr').textContent = 'Name der Liste eintragen.'; return; }
+    if (E().lists.some(l => norm(l.name) === norm(name))) { $('#lErr').textContent = 'Eine Liste mit diesem Namen gibt es schon.'; return; }
+    if (ptxt !== '' && (pr == null || pr < 0)) { $('#lErr').textContent = 'Preis als Zahl eintragen oder leer lassen.'; return; }
+    const rows = await writeRows('event_lists', sb.from('event_lists').insert({ event_id: curId, name: name, price: ptxt === '' ? null : pr }).select());
+    if (rows) toast('Liste «' + name + '» angelegt' + (pr > 0 ? ' (CHF ' + chfs(pr) + ')' : ' (gratis)'));
+  }
+  else if (d.dellist) {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const l = T.lists.find(x => x.id === d.dellist); if (!l || l.is_default) return;
+    if (T.guests.some(g => g.list_id === l.id && guestIn(g.id) > 0)) { toast('Es sind schon Gäste dieser Liste eingelassen.'); return; }
+    confirmTap(t, 'dellist' + l.id, async () => {
+      const r = await run(sb.from('event_lists').delete().eq('id', l.id).select());
+      if (r) { removeLocal('event_lists', l); T.guests = T.guests.filter(g => g.list_id !== l.id); E().cart = E().cart.filter(x => x.cat !== 'L:' + l.id); save(); mark(); toast('Liste «' + l.name + '» entfernt'); }
+    }, 'Sicher? Nochmals tippen');
+  }
+  else if (d.act === 'addguest') {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const name = $('#gName').value.trim(), n = num($('#gN').value);
+    if (!name) { $('#gErr').textContent = 'Name eintragen.'; return; }
+    if (n == null || n < 1 || !Number.isInteger(n)) { $('#gErr').textContent = 'Anzahl als ganze Zahl eintragen.'; return; }
+    const k = await addGuestsServer([{ name: name, n: n, via: ($('#gVia').value || '').trim() }], $('#gList').value);
+    if (k) { toast(name + ' hinzugefügt'); const f = $('#gName'); if (f) f.focus(); }
+  }
+  else if (d.act === 'importguests') {
+    if (!isProd()) return denied(); if (blocked()) return;
+    const arr = parseImport($('#gImp').value);
+    if (!arr.length) { $('#gImpErr').textContent = 'Keine Namen gefunden.'; return; }
+    const k = await addGuestsServer(arr, $('#gImpList').value);
+    if (k) toast(k + ' Einträge hinzugefügt');
+  }
+  else if (d.act === 'addmember') {
+    if (!isAdmin()) return denied();
+    const name = $('#mName').value.trim(); if (!name) { $('#mErr').textContent = 'Name eintragen.'; return; }
+    const k = await addMembersServer([{ name: name }]); if (k) toast(name + ' hinzugefügt');
+  }
+  else if (d.act === 'importmembers') {
+    if (!isAdmin()) return denied();
+    const arr = parseImport($('#mImp').value).map(x => ({ name: x.name }));
+    if (!arr.length) { $('#mImpErr').textContent = 'Keine Namen gefunden.'; return; }
+    const k = await addMembersServer(arr); if (k) toast(k + ' Mitglieder hinzugefügt');
+  }
+  else if (d.act === 'closeevent') {
+    if (!isProd()) return denied();
+    if (E().closed) return;
+    if (E().cart.length) { toast('Bitte zuerst den Warenkorb leeren oder einkassieren.'); return; }
+    if (outbox.some(o => o.event === curId)) { toast('Es warten noch Buchungen auf das Senden. Erst Verbindung abwarten.'); return; }
+    const its = allItems(abschlussData()), bad = its.filter(i => i.cls === 'bad').length, open = its.filter(i => i.cls === 'open').length;
+    const ask = (bad || open) ? ('Noch ' + (bad ? bad + (bad === 1 ? ' Differenz' : ' Differenzen') : '') + (bad && open ? ' und ' : '') + (open ? open + ' offen' : '') + '. Trotzdem abschliessen? Nochmals tippen') : 'Wirklich abschliessen? Nochmals tippen';
+    confirmTap(t, 'close', async () => { flushWrites(); const r = await run(sb.rpc('close_event', { p_event: curId })); if (r !== null) { await refreshSoftForce(); toast('Anlass abgeschlossen'); } }, ask);
+  }
+  else if (d.act === 'reopenevent') {
+    if (!isAdmin()) return denied();
+    confirmTap(t, 'reopen', async () => { const r = await run(sb.rpc('reopen_event', { p_event: curId })); if (r !== null) { await refreshSoftForce(); toast('Anlass wieder geöffnet'); } }, 'Wieder öffnen? Nochmals tippen');
+  }
+});
+async function refreshSoftForce(){ try { await loadStatic(); if (curId) await loadEvent(curId); noteNet(true); } catch(e) {} mark(); }
+
+$('#app').addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'evSel') { selectEvent(t.value).then(() => render()); return; }
+  if (t.id === 'rFrom' || t.id === 'rTo') { rFrom = $('#rFrom').value; rTo = $('#rTo').value; $('#rangeOut').innerHTML = rangeHtml(); return; }
+  if (t.id === 'gSearch') { gSearch = t.value; $('#glList').innerHTML = guestRows(); return; }
+  if (t.dataset.path) {
+    if (E().closed && t.dataset.path.indexOf('ev.') === 0) return;
+    persistPath(t.dataset.path, t.type === 'checkbox' ? t.checked : t.value);
+    if (/^ev\.(plist\.\d+\.cat|terms\.\d+\.nr)$/.test(t.dataset.path)) { setTimeout(() => render(true), 350); return; }
+    if (t.dataset.path === 'ev.name' || t.dataset.path === 'ev.date') { const o = $('#evSel option:checked'); if (o) o.textContent = (E().name || 'ohne Namen') + ' · ' + dmy(E().date).slice(0, 5); }
+    return;
+  }
+  if (t.dataset.ci !== undefined) {
+    if (!isAdmin()) return;
+    const c = T.cats[+t.dataset.ci], f = t.dataset.f; if (!c) return;
+    const patch = f === 'active' ? { active: t.checked } : f === 'kind' ? { kind: t.value } : f === 'list' ? { list_source: t.value === 'members' ? 'members' : 'none' } : { name: t.value };
+    Object.assign(c, patch); mark();
+    debounced('cat:' + c.id, () => writeRows('categories', sb.from('categories').update(patch).eq('id', c.id).select()));
+    return;
+  }
+  if (t.dataset.pi !== undefined) {
+    if (!isAdmin()) return;
+    const p = T.profiles[+t.dataset.pi], f = t.dataset.f; if (!p || p.id === me.id) return;
+    const patch = f === 'active' ? { active: t.checked } : { role: t.value };
+    Object.assign(p, patch);
+    writeRows('profiles', sb.from('profiles').update(patch).eq('id', p.id).select());
+  }
+});
+$('#app').addEventListener('toggle', e => {
+  const el = e.target; if (!el || !el.dataset || el.dataset.open === undefined) return;
+  const k = el.dataset.open;
+  if (k.indexOf('grp:') === 0 && gSearch.trim()) return;
+  openState[k] = el.open;
+}, true);
+$('#cartbar').addEventListener('click', e => {
+  const b = e.target.closest('[data-cb]'); if (!b) return;
+  if (b.dataset.cb === 'clear') { E().cart = []; save(); render(true); } else checkout(b.dataset.cb);
+});
+$('nav').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (!b) return; tab = b.dataset.tab; render();
+});
+
+start();
+
+})();
+
+</script>
+</body>
+</html>
