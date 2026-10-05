@@ -236,6 +236,37 @@ input[type=email]{font:inherit;color:var(--ink);background:var(--bg);border:1.5p
 .dot.green{background:var(--ok)}.dot.amber{background:var(--accent)}.dot.grey{background:var(--muted)}
 .link{background:none;border:0;padding:0;color:inherit;text-decoration:underline;font:inherit;cursor:pointer}
 .link.bad{color:var(--bad);font-weight:700}
+/* v7: Handy-Layout (nach Test im echten Browser) */
+.cats{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:640px){.cats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.cat{min-width:0}
+.cn,.cp,.gn,.gm{overflow-wrap:anywhere}
+.g{min-width:0}
+.g>div{min-width:0}
+.g .gb{flex-wrap:wrap}
+.g .gb .primary{flex:1 1 150px}
+.btns{flex-wrap:wrap}
+button{max-width:100%}
+/* v7b: Kategorie-Knöpfe: Zähler in die untere Zeile, damit der Name die ganze Breite hat */
+.cat{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 1fr;gap:6px 8px;align-content:space-between;text-align:left}
+.cat .cn{grid-column:1 / -1;padding-right:0;overflow-wrap:break-word;hyphens:manual;font-size:1rem}
+.cat .cp{grid-column:1;align-self:end;margin-top:0;font-size:.85rem}
+.cat .cc{position:static;grid-column:2;align-self:end;top:auto;right:auto}
+/* v8: Personensuche im Einlass, Einladungen, oeffentliche Seite, Preiszeilen mit Zeit */
+.psearch{margin:0 0 14px}
+.psearch .sl{max-height:none;overflow:visible;margin-top:8px}
+.irow{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:8px 10px;align-items:end;padding:10px 0;border-bottom:1px solid var(--line)}
+.irow .ghost{grid-column:1 / -1}
+body.pub nav{display:none}
+body.pub main{padding-bottom:40px}
+.prow2 .chk{align-self:end}
+/* v9: Namen volle Breite, Navigation auf sehr schmalen Handys */
+.fgrid>.span2{grid-column:1 / -1}
+.lrow>label:first-child{grid-column:1 / -1}
+@media (max-width:340px){nav button{font-size:.7rem;padding:0 1px;letter-spacing:-.01em}}
+nav button{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav button{font-size:.78rem;padding:0 2px}
+@media (max-width:340px){nav button{font-size:.68rem}}
 </style>
 </head>
 <body>
@@ -249,8 +280,8 @@ input[type=email]{font:inherit;color:var(--ink);background:var(--bg);border:1.5p
 (function(){
 'use strict';
 const PRICE_JACKE=2, PRICE_TASCHE=5;
-const ROLES={kasse:'Kasse',gard:'Garderobe',prod:'Produktion',admin:'Admin'};
-const TABS={kasse:['einlass','gl'],gard:['gard'],prod:['einlass','gl','gard','ab','ev'],admin:['einlass','gl','gard','ab','ev']};
+const ROLES={kasse:'Kasse',gard:'Garderobe',booking:'Booking',prod:'Produktion',admin:'Admin'};
+const TABS={kasse:['einlass','gl'],gard:['gard'],booking:['gl','ev'],prod:['einlass','gl','gard','ab','ev'],admin:['einlass','gl','gard','ab','ev']};
 const TAB_LABEL={einlass:'Einlass',gl:'Liste',gard:'Garderobe',ab:'Abschluss',ev:'Anlass'};
 const NOTEN=[{k:'n200',d:200,row:20},{k:'n100',d:100,row:21},{k:'n50',d:50,row:22,stock:true},{k:'n20',d:20,row:23,stock:true},{k:'n10',d:10,row:24,stock:true}];
 const ROLLEN=[{k:'r5',short:'5.–',val:125,row:25},{k:'r2',short:'2.–',val:100,row:26},{k:'r1',short:'1.–',val:50,row:27},{k:'r05',short:'–.50',val:25,row:28}];
@@ -283,8 +314,8 @@ function cfg(){
   try { c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}') || {}; } catch(e) {}
   return { url: CONFIG.url || c.url || '', anonKey: CONFIG.anonKey || c.anonKey || '' };
 }
-const DBROLE = { kasse: 'Kasse', garderobe: 'Garderobe', produktion: 'Produktion', admin: 'Admin' };
-const ROLE_FROM_DB = { kasse: 'kasse', garderobe: 'gard', produktion: 'prod', admin: 'admin' };
+const DBROLE = { kasse: 'Kasse', garderobe: 'Garderobe', booking: 'Booking', produktion: 'Produktion', admin: 'Admin' };
+const ROLE_FROM_DB = { kasse: 'kasse', garderobe: 'gard', booking: 'booking', produktion: 'prod', admin: 'admin' };
 
 /* ---------- Zustand ---------- */
 let sb = null, me = null, profile = null;
@@ -293,13 +324,14 @@ let bootMsg = '';
 let role = null, tab = 'einlass';
 const isProd = () => role === 'prod' || role === 'admin';
 const isAdmin = () => role === 'admin';
+const isPlanner = () => role === 'booking' || role === 'prod' || role === 'admin';
 const DEVICE = (function(){
   try { let d = localStorage.getItem('eos-device'); if (!d) { d = 'dev-' + uuid().slice(0, 8); localStorage.setItem('eos-device', d); } return d; }
   catch(e) { return 'dev'; }
 })();
 
 // Rohdaten vom Server (T) und die daraus abgeleitete Sicht fuer die Oberflaeche (S, E)
-const T = { cats: [], members: [], events: [], totals: {}, prices: [], lists: [], guests: [], terms: [], coat: null, cash: [], tx: [], lines: [], profiles: [] };
+const T = { invites: [], cats: [], members: [], events: [], totals: {}, prices: [], lists: [], guests: [], terms: [], coat: null, cash: [], tx: [], lines: [], profiles: [] };
 const S = { cats: [], members: [], events: [] };
 let curId = null;
 let EV = null, evDirty = true;
@@ -348,7 +380,7 @@ function buildEvent(){
   const e = { id: ev.id, none: false, name: ev.name, date: ev.event_date, closed: ev.status === 'closed', closedAt: ev.closed_at ? Date.parse(ev.closed_at) : null };
   e.lists = listRows().map(l => ({ id: l.id, name: l.name, price: l.price == null ? '' : numStr(l.price), fixed: !!l.is_default }));
   e.guests = T.guests.map(g => ({ id: g.id, name: g.name, n: g.party_size, via: g.via || '', list: g.list_id }));
-  e.plist = priceRows().map(r => ({ cat: r.category_id, price: r.price == null ? '' : numStr(r.price), on: r.active }));
+  e.plist = priceRows().map(r => ({ cat: r.category_id, price: r.price == null ? '' : numStr(r.price), on: r.active, from: hm5(r.valid_from), until: hm5(r.valid_until) }));
   e.terms = termRows().map(t => ({ nr: String(t.terminal_nr), use: t.used_at, amt: t.daily_close == null ? '' : numStr(t.daily_close) }));
   e.ab = { gutscheine: ev.vouchers_collected == null ? '' : String(ev.vouchers_collected), vvkScan: ev.vvk_scanned == null ? '' : String(ev.vvk_scanned) };
   e.gard = {};
@@ -448,14 +480,15 @@ async function loadStatic(){
 }
 async function loadEvent(id){
   const q = t => sb.from(t).select('*').eq('event_id', id);
-  const [prices, lists, guests, terms, coat, cash, tx, lines] = await Promise.all([
+  const [prices, lists, guests, terms, coat, cash, tx, lines, invites] = await Promise.all([
     q('event_prices'), q('event_lists'), fetchAll(() => q('list_guests').order('name').order('id')), q('event_terminals'),
     q('event_coatcheck'), q('cash_counts'),
-    fetchAll(() => q('transactions').order('created_at').order('id')), fetchAll(() => q('transaction_lines').order('id'))
+    fetchAll(() => q('transactions').order('created_at').order('id')), fetchAll(() => q('transaction_lines').order('id')),
+    sb.from('invite_links').select('id,event_id,list_id,via,quota,used,expires_at,revoked,created_at').eq('event_id', id).order('created_at')
   ]);
   [prices, lists, terms, coat, cash].forEach(r => { if (r.error) throw r.error; });
   T.prices = prices.data || []; T.lists = lists.data || []; T.guests = guests; T.terms = terms.data || [];
-  T.coat = (coat.data || [])[0] || null; T.cash = cash.data || []; T.tx = tx; T.lines = lines;
+  T.coat = (coat.data || [])[0] || null; T.cash = cash.data || []; T.tx = tx; T.lines = lines; T.invites = (invites && invites.data) || [];
 }
 async function pullTx(txId){
   const [t, l] = await Promise.all([sb.from('transactions').select('*').eq('id', txId), sb.from('transaction_lines').select('*').eq('tx_id', txId)]);
@@ -474,10 +507,10 @@ function pickEvent(){
 const KEYS = {
   event_prices: r => r.event_id + '|' + r.category_id, event_lists: r => r.id, list_guests: r => r.id,
   event_terminals: r => r.event_id + '|' + r.terminal_nr, cash_counts: r => r.event_id + '|' + r.register + '|' + r.phase,
-  transactions: r => r.id, transaction_lines: r => r.id, events: r => r.id, members: r => r.id, categories: r => r.id, profiles: r => r.id
+  transactions: r => r.id, transaction_lines: r => r.id, invite_links: r => r.id, events: r => r.id, members: r => r.id, categories: r => r.id, profiles: r => r.id
 };
 const TARGET = { event_prices: 'prices', event_lists: 'lists', list_guests: 'guests', event_terminals: 'terms', cash_counts: 'cash',
-                 transactions: 'tx', transaction_lines: 'lines', events: 'events', members: 'members', categories: 'cats', profiles: 'profiles' };
+                 transactions: 'tx', transaction_lines: 'lines', invite_links: 'invites', events: 'events', members: 'members', categories: 'cats', profiles: 'profiles' };
 function recentlyEdited(table, row){ return Date.now() - (lastEdit || 0) < 1500 && table !== 'transactions' && table !== 'transaction_lines'; }
 function upsertLocal(table, row){
   if (table === 'event_coatcheck') { T.coat = row; return; }
@@ -509,7 +542,7 @@ function startRealtime(){
   if (!sb || !curId) return;
   const ch = sb.channel('eos-' + curId + '-' + Math.random().toString(36).slice(2, 7));
   const f = 'event_id=eq.' + curId;
-  ['event_prices', 'event_lists', 'list_guests', 'event_terminals', 'event_coatcheck', 'cash_counts', 'transactions', 'transaction_lines']
+  ['event_prices', 'event_lists', 'list_guests', 'event_terminals', 'event_coatcheck', 'cash_counts', 'transactions', 'transaction_lines', 'invite_links']
     .forEach(t => ch.on('postgres_changes', { event: '*', schema: 'public', table: t, filter: f }, p => applyChange(t, p)));
   ch.on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, p => applyChange('events', p));
   ch.on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, p => applyChange('members', p));
@@ -527,9 +560,12 @@ async function refreshSoft(){
   catch(e) { noteNet(!!(e && e.code)); }
   mark();
 }
-let loopT = null;
+let loopT = null, availT = null;
+let availSig = '';
+function availabilitySig(){ try { return evCats().filter(c => isOn(c)).map(c => c.id).join(','); } catch(e) { return ''; } }
 function startLoops(){
   clearInterval(loopT);
+  clearInterval(availT); availT = setInterval(() => { if (boot !== 'ready' || document.hidden) return; const sg = availabilitySig(); if (sg !== availSig) { availSig = sg; scheduleRender(); } }, 10000);
   loopT = setInterval(() => { if (document.hidden) return; flush(); if (rtState !== 'live' || Date.now() - lastFull > 60000) refreshSoft(); }, 15000);
 }
 window.addEventListener('online', () => { flush(); refreshSoft(); });
@@ -661,7 +697,8 @@ function persistPath(path, value){
   }
   else if (p[1] === 'plist') {
     const row = priceRows()[+p[2]]; if (!row) return;
-    if (p[3] === 'price') { row.price = num(value); debounced('price:' + row.category_id, () => writeRows('event_prices', sb.from('event_prices').update({ price: row.price }).match({ event_id: curId, category_id: row.category_id }).select())); }
+    if (p[3] === 'until') { const v = value ? value : null; row.valid_until = v; debounced('until:' + row.category_id, async () => { const r = await run(sb.from('event_prices').update({ valid_until: v }).match({ event_id: curId, category_id: row.category_id }).select()); if (r) await reloadPrices(); }); }
+    else if (p[3] === 'price') { row.price = num(value); debounced('price:' + row.category_id, () => writeRows('event_prices', sb.from('event_prices').update({ price: row.price }).match({ event_id: curId, category_id: row.category_id }).select())); }
     else if (p[3] === 'on') { row.active = !!value; writeRows('event_prices', sb.from('event_prices').update({ active: !!value }).match({ event_id: curId, category_id: row.category_id }).select()); }
     else if (p[3] === 'cat') {
       const old = Object.assign({}, row);
@@ -669,7 +706,7 @@ function persistPath(path, value){
         const del = await run(sb.from('event_prices').delete().match({ event_id: curId, category_id: old.category_id }).select());
         if (del) {
           removeLocal('event_prices', old);
-          await writeRows('event_prices', sb.from('event_prices').insert({ event_id: curId, category_id: value, price: old.price, active: true }).select());
+          await writeRows('event_prices', sb.from('event_prices').insert({ event_id: curId, category_id: value, price: old.price, active: true, valid_until: old.valid_until || null }).select());
           const c = S.cats.find(x => x.id === value);
           if (c && c.reduced) await reloadPrices();    // Reduziert-Regel (wie add_reduced_price) hier nicht noetig; Stand neu laden
         }
@@ -689,16 +726,70 @@ function persistPath(path, value){
 }
 async function reloadPrices(){ const r = await sb.from('event_prices').select('*').eq('event_id', curId); if (!r.error) { T.prices = r.data || []; mark(); } }
 
+
+/* ---------- Oeffentliche Einladungsseite (ohne Anmeldung) ---------- */
+const inv = { token: '', loaded: false, info: null, rows: [{ name: '', size: 1 }], err: '', done: null, busy: false };
+function inviteToken(){ const m = /^#einladung=([A-Za-z0-9]{20,})$/.exec(location.hash || ''); return m ? m[1] : null; }
+function invTotal(){ return inv.rows.reduce((s, r) => s + (String(r.name).trim() ? Number(r.size) : 0), 0); }
+function inviteHtml(){
+  if (!inv.loaded) return '<h1>Gästeliste</h1><p class="empty">Wird geladen …</p>';
+  if (inv.err && !inv.info) return '<h1>Gästeliste</h1><p>' + esc(inv.err) + '</p>';
+  if (!inv.info) return '<h1>Dieser Link ist ungültig</h1><p class="hint">Bitte frage bei der Person nach, die dir den Link geschickt hat.</p>';
+  const i = inv.info, date = i.event_date ? dmy(i.event_date) : '';
+  const head = '<h1>Gästeliste</h1><p><b>' + esc(i.event_name || '') + '</b>' + (date ? ' · ' + esc(date) : '') + '<br><span class="hint">Liste «' + esc(i.list_name) + '» · eingetragen über ' + esc(i.via) + '</span></p>';
+  if (inv.done) return head + '<div class="status ok" role="status">✓ ' + inv.done.n + (inv.done.n === 1 ? ' Person eingetragen' : ' Personen eingetragen') + '</div><ul class="log">' + inv.done.names.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>' +
+    (inv.done.remaining > 0 ? '<p class="hint">Du kannst noch ' + inv.done.remaining + (inv.done.remaining === 1 ? ' Person' : ' Personen') + ' eintragen.</p><div class="btns"><button class="primary" data-act="inv-more">Weitere Personen eintragen</button></div>' : '<p class="hint">Das Kontingent ist aufgebraucht.</p>') +
+    '<p class="hint">Änderungen bitte direkt bei den Veranstaltern melden.</p>';
+  if (!i.open) return head + '<p>' + (i.remaining <= 0 ? 'Das Kontingent ist aufgebraucht.' : 'Dieser Link ist nicht mehr gültig (abgelaufen, gesperrt oder der Anlass ist abgeschlossen).') + '</p><p class="hint">Bitte frage bei den Veranstaltern nach.</p>';
+  const max = Math.min(10, i.remaining);
+  const rows = inv.rows.map((r, k) => '<div class="irow"><label class="f"><span>Name</span><input data-ir="' + k + '" data-f="name" type="text" autocomplete="off" value="' + esc(r.name) + '"></label>' +
+    '<label class="f"><span>Personen</span><select data-ir="' + k + '" data-f="size">' + Array.from({ length: max }, (_, n) => '<option value="' + (n + 1) + '"' + (Number(r.size) === n + 1 ? ' selected' : '') + '>' + (n + 1) + '</option>').join('') + '</select></label>' +
+    (inv.rows.length > 1 ? '<button class="ghost" data-act="inv-del" data-i="' + k + '">Entfernen</button>' : '') + '</div>').join('');
+  const tot = invTotal();
+  return head + '<p class="hint">Trage Name und Personenzahl ein. «Personen» zählt die Person selbst mit: 2 heisst Person plus eine Begleitung. Du kannst insgesamt noch <b>' + i.remaining + '</b> ' + (i.remaining === 1 ? 'Person' : 'Personen') + ' eintragen.</p>' + rows +
+    '<div class="btns"><button class="ghost" data-act="inv-add">Weitere Person hinzufügen</button></div>' +
+    '<p class="sub" id="invTot">Eingetragen: <b>' + tot + '</b> von ' + i.remaining + '</p><div class="err" id="invMsg" role="alert">' + esc(inv.err) + '</div>' +
+    '<div class="btns"><button class="primary" data-act="inv-send"' + (inv.busy ? ' disabled' : '') + '>Absenden</button></div>';
+}
+async function startInvite(token){
+  boot = 'invite'; inv.token = token; inv.loaded = false; render();
+  if (!window.supabase) { inv.loaded = true; inv.err = 'Die Seite konnte nicht geladen werden. Bitte Internetverbindung prüfen und neu laden.'; render(); return; }
+  if (!initClient(false)) { inv.loaded = true; inv.err = 'Diese Seite ist nicht eingerichtet.'; render(); return; }
+  let r;
+  try { r = await sb.rpc('invite_info', { p_token: token }); } catch(e) { inv.loaded = true; inv.err = 'Keine Verbindung. Bitte später nochmals versuchen.'; render(); return; }
+  inv.loaded = true;
+  if (r.error) { inv.err = r.error.code ? 'Der Link konnte nicht geprüft werden.' : 'Keine Verbindung. Bitte später nochmals versuchen.'; inv.info = null; }
+  else inv.info = r.data;
+  render();
+}
+async function submitInvite(){
+  const list = inv.rows.filter(r => String(r.name).trim()).map(r => ({ name: String(r.name).trim(), party_size: Number(r.size) }));
+  if (!list.length) { inv.err = 'Bitte mindestens einen Namen eintragen.'; return render(); }
+  if (list.some(x => x.name.length > 100)) { inv.err = 'Ein Name ist zu lang.'; return render(); }
+  const tot = list.reduce((s, x) => s + x.party_size, 0);
+  if (tot > inv.info.remaining) { inv.err = 'Das sind mehr Personen als noch möglich (' + inv.info.remaining + ').'; return render(); }
+  inv.busy = true; inv.err = ''; render();
+  let r;
+  try { r = await sb.rpc('submit_invite', { p_token: inv.token, p_guests: list }); } catch(e) { r = { error: { message: '' } }; }
+  inv.busy = false;
+  if (r.error) { inv.err = r.error.code ? r.error.message : 'Keine Verbindung. Bitte nochmals versuchen. Es wurde nichts eingetragen.'; return render(); }
+  inv.done = { n: r.data.accepted, remaining: r.data.remaining, names: list.map(x => x.name + (x.party_size > 1 ? ' +' + (x.party_size - 1) : '')) };
+  inv.info.remaining = r.data.remaining; inv.info.open = r.data.remaining > 0;
+  inv.rows = [{ name: '', size: 1 }]; render();
+}
+
 /* ---------- Anmeldung und Start ---------- */
-function initClient(){
+function initClient(persist){
   const c = cfg();
   if (!c.url || !c.anonKey || !window.supabase) return false;
-  sb = window.supabase.createClient(c.url, c.anonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
-  sb.auth.onAuthStateChange(evt => { if (evt === 'SIGNED_OUT' && boot === 'ready') { resetSession(); boot = 'login'; render(); } });
+  const keep = persist !== false;
+  sb = window.supabase.createClient(c.url, c.anonKey, { auth: { persistSession: keep, autoRefreshToken: keep, detectSessionInUrl: false } });
+  if (keep) sb.auth.onAuthStateChange(evt => { if (evt === 'SIGNED_OUT' && boot === 'ready') { resetSession(); boot = 'login'; render(); } });
   return true;
 }
 function resetSession(){ stopRealtime(); clearInterval(loopT); me = null; profile = null; role = null; Object.keys(T).forEach(k => { T[k] = Array.isArray(T[k]) ? [] : (k === 'totals' ? {} : null); }); T.coat = null; curId = null; EV = null; evDirty = true; syncS(); }
 async function start(){
+  const itok = inviteToken(); if (itok) return startInvite(itok);
   boot = 'init'; render();
   if (!window.supabase) { boot = 'error'; bootMsg = 'Die Bibliothek supabase-js konnte nicht geladen werden. Prüfe die Internetverbindung und lade die Seite neu.'; render(); return; }
   if (!initClient()) { boot = 'config'; render(); return; }
@@ -736,18 +827,26 @@ async function doLogout(){ flushWrites(); try { await sb.auth.signOut(); } catch
 async function selectEvent(id){
   flushWrites();
   curId = id; try { localStorage.setItem('eos-cur', id); } catch(e) {}
-  T.prices = []; T.lists = []; T.guests = []; T.terms = []; T.coat = null; T.cash = []; T.tx = []; T.lines = [];
+  T.prices = []; T.lists = []; T.guests = []; T.terms = []; T.coat = null; T.cash = []; T.tx = []; T.lines = []; T.invites = [];
   mark();
   try { await loadEvent(id); noteNet(true); } catch(e) { noteNet(!!(e && e.code)); }
   startRealtime(); mark();
 }
 
+const hm5 = t => t ? String(t).slice(0, 5) : '';
+function evTime(dateIso, hm){ const a = String(dateIso).split('-').map(Number), b = String(hm).split(':').map(Number); return new Date(a[0], a[1] - 1, a[2] + (b[0] < 6 ? 1 : 0), b[0], b[1] || 0, 0, 0).getTime(); }
+function inWindow(r, now){
+  const e = E(); if (!e.date) return true;
+  if (r.from && now < evTime(e.date, r.from)) return false;
+  if (r.until && now >= evTime(e.date, r.until)) return false;
+  return true;
+}
 function prow(c){ return (E().plist||[]).find(r=>r.cat===c.id); }
 function remaining(cat){ return peopleFor(cat).reduce((s,g)=>s+Math.max(0,g.n-guestIn(g.id)-guestInCart(g.id)),0); }
 function isOn(c){
   if(c.virtual) return remaining(c)>0;
   if(c.kind==='free') return c.active&&(!c.list||remaining(c)>0);
-  const r=prow(c); return !!r&&r.on!==false;
+  const r=prow(c); return !!r&&r.on!==false&&inWindow(r,Date.now());
 }
 function priceOf(c){ if(c.virtual) return c.price; if(c.kind==='free') return 0; const r=prow(c); return r?num(r.price):null; }
 function priceMissing(c){ return c.kind==='paid'&&!c.virtual&&isOn(c)&&priceOf(c)==null; }
@@ -879,7 +978,7 @@ function allItems(ad){ return [].concat(ad.ak,ad.gard,ad.misc).filter(i=>!i.info
 function inp(path,label,o){
   o=o||{}; const v=get(path);
   const attrs=o.type?'type="'+o.type+'"':'inputmode="'+(o.mode||'decimal')+'"';
-  return '<label class="f"><span>'+label+'</span><input data-path="'+path+'" '+attrs+' value="'+esc(v==null?'':v)+'" autocomplete="off"'+(o.ph?' placeholder="'+esc(o.ph)+'"':'')+lk(path)+'></label>';
+  return '<label class="f'+(o.span?' span2':'')+'"><span>'+label+'</span><input data-path="'+path+'" '+attrs+' value="'+esc(v==null?'':v)+'" autocomplete="off"'+(o.ph?' placeholder="'+esc(o.ph)+'"':'')+lk(path)+'></label>';
 }
 function renderItems(items){
   return items.map(i=>{
@@ -1029,13 +1128,14 @@ function rangeControls(){
 /* ---------- Views ---------- */
 function viewEinlass(){
   const st=stats(), e=E();
-  const cats=evCats().filter(c=>isOn(c)).map(c=>{
+  const cats=evCats().filter(c=>isOn(c)&&!c.list).map(c=>{
     const n=cartQtyFor(c.id), miss=priceMissing(c), pr=priceOf(c);
-    const p=miss?'Preis fehlt':c.list?('Person suchen'+(c.kind==='paid'?' · CHF '+chfs(pr):'')):c.kind==='free'?'gratis':c.kind==='custom'?'Betrag frei':'CHF '+chfs(pr);
+    const rw=prow(c), until=rw&&rw.until?' · bis '+rw.until:'';
+    const p=miss?'Preis fehlt':c.kind==='free'?'gratis':c.kind==='custom'?'Betrag frei':'CHF '+chfs(pr)+until;
     return '<button class="cat '+c.kind+'" data-cat="'+c.id+'"'+(miss||E().closed?' disabled':'')+'><span class="cn">'+esc(c.name)+'</span><span class="cp">'+p+'</span><span class="cc'+(n?' on':'')+'" aria-label="'+n+' im Warenkorb">'+n+'</span></button>';
   }).join('');
   const missing=S.cats.filter(priceMissing);
-  const hiddenLists=e.lists.filter(l=>remaining(listCat(l))===0).map(l=>l.name);
+  const later=e.plist.filter(r=>r.on!==false&&r.from&&!inWindow(r,Date.now())).map(r=>{ const c=S.cats.find(x=>x.id===r.cat); return (c?c.name:r.cat)+' ab '+r.from; });
   const cart=e.cart.length?'<div class="card cart"><h2>Warenkorb</h2><ul>'+e.cart.map(l=>
     '<li><span class="cq">'+l.qty+'×</span><span class="cname">'+esc(l.name)+(l.who?'<small>'+esc(l.who)+'</small>':l.custom?'<small>Betrag frei</small>':'')+'</span>'+
     '<span class="cam">'+(l.kind==='free'?'gratis':'CHF '+chfs(l.amount))+'</span>'+
@@ -1052,7 +1152,8 @@ function viewEinlass(){
     '<p class="sub">bar <b>CHF '+chf(st.bar)+'</b> · Karte <b>CHF '+chf(st.karte)+'</b></p>'+
     (missing.length?'<p class="note">Preis fehlt für diesen Anlass: '+missing.map(c=>esc(c.name)).join(', ')+'. Die Produktion trägt ihn im Tab Anlass ein.</p>':(!evCats().some(c=>c.kind!=='free'&&isOn(c))?'<p class="note">Für diesen Anlass sind noch keine Preise erfasst. Die Produktion trägt sie im Tab Anlass ein.</p>':''))+
     cart+
-    '<details class="dtl catbox" data-open="cats"'+((openState.cats||e.cart.length)?' open':'')+'><summary>Abendkasse: Kategorien zum Tippen</summary><div class="cats">'+cats+'</div>'+(hiddenLists.length?'<p class="hint" style="margin:0 0 10px">Ohne offene Gäste ausgeblendet: '+hiddenLists.map(esc).join(', ')+'.</p>':'')+'</details>'+
+    '<div class="card psearch"><label class="f"><span>Person auf einer Liste suchen (GL, Friendsliste, Member …)</span><input id="pSearch" type="text" value="'+esc(pQuery)+'" autocomplete="off" placeholder="Name oder «über wen» eintippen"></label><div id="pResults">'+pResultsHtml()+'</div></div>'+
+    '<details class="dtl catbox" data-open="cats"'+((openState.cats||e.cart.length)?' open':'')+'><summary>Abendkasse: Kategorien zum Tippen</summary><div class="cats">'+cats+'</div>'+(later.length?'<p class="hint" style="margin:0 0 10px">Noch nicht im Einsatz: '+later.map(esc).join(', ')+'.</p>':'')+'</details>'+
     '<div class="card"><h2>Letzte Buchungen</h2>'+(groups?'<ul class="log">'+groups+'</ul>':'<p class="empty">Noch keine Buchungen. Kategorie antippen und einkassieren.</p>')+
     '<p class="hint" style="margin-top:8px">Stornieren löscht nichts, sondern bucht die ganze Buchung gegen.</p></div>'+
     '<div class="card"><details class="dtl" data-open="zaehl"'+(openState.zaehl?' open':'')+'><summary>Zählung nach Kategorie und Zeitraum</summary>'+rangeControls()+'<div id="rangeOut">'+rangeHtml()+'</div></details></div>';
@@ -1071,16 +1172,29 @@ function renderCartBar(){
 }
 
 let gSearch='';
+let pQuery='';
 const openState={};
 let rFrom='', rTo='';
+function pResultsHtml(){
+  const q=norm(pQuery.trim());
+  if(!q) return '<p class="hint" style="margin:6px 0 0">'+(allGuests().length?'Tippe einen Namen ein. Gefunden wird auf allen Listen dieses Anlasses und bei den Mitgliedern.':'Auf den Listen steht noch niemand.')+'</p>';
+  const list=allGuests().filter(g=>norm(g.name+' '+(g.via||'')).indexOf(q)>=0).sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  if(!list.length) return '<p class="empty">Kein Treffer für «'+esc(pQuery)+'».</p>';
+  return '<ul class="sl">'+list.slice(0,8).map(g=>{
+    const inn=guestIn(g.id), inc=guestInCart(g.id), rem=g.n-inn-inc, cat=catOf(g), pr=priceOf(cat);
+    const price=cat.kind==='paid'?' · CHF '+chfs(pr):' · gratis';
+    return '<li><div class="sn"><b>'+esc(g.name)+'</b><small>'+esc(g.catName)+price+(g.via?' · über '+esc(g.via):'')+' · '+inn+' / '+g.n+' eingelassen'+(inc?' · '+inc+' im Warenkorb':'')+'</small></div>'+
+      (rem>0?'<button class="primary" data-padd="'+g.id+'">Hinzufügen</button>':'<button class="ghost" disabled>'+(inc?'Im Warenkorb':'Komplett')+'</button>')+'</li>';
+  }).join('')+'</ul>'+(list.length>8?'<p class="hint">Nur die ersten 8 Treffer. Weiter tippen, um einzugrenzen.</p>':'');
+}
 function guestRowHtml(g){
-  const inn=guestIn(g.id), done=inn>=g.n, cat=catOf(g), canEdit=g.member?isAdmin():isProd();
+  const inn=guestIn(g.id), done=inn>=g.n, cat=catOf(g), canEdit=g.member?isAdmin():isPlanner();
   const act=cat.kind==='free'?'Einlassen':'In den Warenkorb';
   return '<li class="g'+(done?' done':'')+'"><div><div class="gn">'+esc(g.name)+'</div><div class="gm">'+esc(g.catName)+(g.member?' (alle Anlässe)':' · '+g.n+(g.n===1?' Person':' Personen'))+(g.via?' · über '+esc(g.via):'')+'</div></div>'+
     '<div class="gs">'+(done?'✓ ':'')+inn+' / '+g.n+'</div>'+
     '<div class="gb">'+(done?'<span class="hint" style="flex:1;align-self:center">Komplett eingelassen</span>':'<button class="primary" data-gin="'+g.id+'">'+act+'</button>')+
     (inn>0?'<button class="ghost" data-gout="'+g.id+'" aria-label="Eine Person zurücknehmen">−1</button>':'')+
-    (!g.member&&isProd()?'<button class="ghost" data-gplus="'+g.id+'" aria-label="Anzahl Personen um eins erhöhen">Anzahl +1</button>':'')+
+    (!g.member&&isPlanner()?'<button class="ghost" data-gplus="'+g.id+'" aria-label="Anzahl Personen um eins erhöhen">Anzahl +1</button>':'')+
     (inn===0&&canEdit?'<button class="ghost" data-gdel="'+g.id+'" aria-label="Gast entfernen">Entfernen</button>':'')+'</div></li>';
 }
 function guestRows(){
@@ -1107,7 +1221,7 @@ function viewGl(){
     '<div id="glList">'+guestRows()+'</div>';
   if(E().closed){
     h+='<p class="note" style="margin-top:14px">Anlass abgeschlossen: Die Listen sind nicht mehr bearbeitbar.</p>';
-  } else if(isProd()){
+  } else if(isPlanner()){
     h+='<div class="card" style="margin-top:14px"><h2>Listen dieses Anlasses</h2>'+
       '<p class="hint">GL ist immer dabei. Mit einem Preis wird die Liste zur Preiskategorie an der Kasse. Ohne Preis ist sie gratis. Die Kategorie erscheint nur, solange noch Gäste offen sind.</p>'+
       e.lists.map((l,i)=>{ const ppl=e.guests.filter(g=>g.list===l.id), n=ppl.reduce((s,g)=>s+g.n,0), inn=ppl.reduce((s,g)=>s+guestIn(g.id),0);
@@ -1129,6 +1243,7 @@ function viewGl(){
       '<textarea id="gImp" aria-label="Liste einfügen"></textarea>'+
       '<label class="f" style="margin-top:10px"><span>Liste</span><select id="gImpList">'+opts+'</select></label>'+
       '<div class="err" id="gImpErr" role="alert"></div><div class="btns"><button class="primary" data-act="importguests">Einfügen</button></div></details></div>':'');
+    h+=invitesCard();
   } else {
     h+='<p class="note" style="margin-top:14px">Listen erfassen kann die Produktion, die Mitgliederliste nur der Admin. An der Kasse wird nur eingelassen.</p>';
   }
@@ -1140,6 +1255,38 @@ function viewGl(){
       '<textarea id="mImp" aria-label="Mitglieder einfügen"></textarea><div class="err" id="mImpErr" role="alert"></div><div class="btns"><button class="primary" data-act="importmembers">Einfügen</button></div></details></div>';
   }
   return h;
+}
+
+function invStatus(i){
+  if(i.revoked) return 'gesperrt';
+  if(i.expires_at&&Date.parse(i.expires_at)<Date.now()) return 'abgelaufen';
+  if(i.used>=i.quota) return 'voll';
+  return 'aktiv';
+}
+function invitesCard(){
+  const e=E(), opts=e.lists.map(l=>'<option value="'+l.id+'">'+esc(l.name)+'</option>').join('');
+  const rows=T.invites.slice().reverse().map(i=>{
+    const l=e.lists.find(x=>x.id===i.list_id), st=invStatus(i);
+    const until=i.expires_at?' · gültig bis '+dmy(i.expires_at.slice(0,10)).slice(0,5):'';
+    return '<div class="evrow"><div><b>'+esc(i.via)+'</b> · '+esc(l?l.name:'Liste')+'<div class="hint">'+i.used+' / '+i.quota+' Personen'+until+' · '+st+'</div></div>'+
+      '<div class="evbtn">'+(st==='aktiv'?'<button class="danger" data-invrev="'+i.id+'">Sperren</button>':'')+'</div></div>';
+  }).join('');
+  return '<div class="card"><h2>Einladungslinks</h2><p class="hint">Mit einem Link können Bands, DJs oder Agenturen ihre Gäste selbst auf eine Liste setzen, bis die Personenzahl erreicht ist. Es braucht kein Konto.</p>'+rows+
+    '<h3>Neuer Link</h3><div class="fgrid"><label class="f"><span>Liste</span><select id="invList">'+opts+'</select></label>'+
+    '<label class="f"><span>Von wem (z. B. Band)</span><input id="invVia" type="text" autocomplete="off"></label>'+
+    '<label class="f"><span>Anzahl Personen</span><input id="invQuota" inputmode="numeric" value="10"></label>'+
+    '<label class="f"><span>Gültig bis (optional)</span><input id="invExp" type="date"></label></div>'+
+    '<div class="err" id="invErr" role="alert"></div><div class="btns"><button class="primary" data-act="addinvite">Link erstellen</button></div></div>';
+}
+let lastLink=null;
+function openLink(url,via){
+  lastLink={url:url,via:via};
+  sheet.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="Einladungslink"><h2>Einladungslink für «'+esc(via)+'»</h2>'+
+    '<p class="hint">Der Link wird nur jetzt angezeigt. Kopiere ihn oder teile ihn direkt. Geht er verloren, sperrst du ihn und erstellst einen neuen.</p>'+
+    '<label class="f"><span>Link</span><input id="linkBox" type="text" readonly value="'+esc(url)+'"></label>'+
+    '<div class="btns"><button class="primary" data-sh="copylink">Link kopieren</button>'+(navigator.share?'<button class="ghost" data-sh="sharelink">Teilen</button>':'')+'</div>'+
+    '<div class="btns"><button class="ghost" data-sh="done">Schliessen</button></div></div>';
+  sheet.hidden=false;
 }
 function parseImport(txt){
   return txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>{
@@ -1204,13 +1351,15 @@ function viewEv(){
     return '<div class="prow2"><label class="f"><span>Kategorie</span><select data-path="ev.plist.'+i+'.cat"'+lk('ev.')+'>'+
       opts.map(o=>'<option value="'+o.id+'"'+(o.id===r.cat?' selected':'')+((used.indexOf(o.id)>=0&&o.id!==r.cat)?' disabled':'')+'>'+esc(o.name)+'</option>').join('')+'</select></label>'+
       '<label class="f"><span>Preis CHF'+(c.kind==='custom'?' (optional)':'')+'</span><input data-path="ev.plist.'+i+'.price" inputmode="decimal" value="'+esc(r.price)+'" autocomplete="off"'+lk('ev.')+'></label>'+
+      '<label class="f"><span>gilt bis (optional)</span><input type="time" data-path="ev.plist.'+i+'.until" value="'+esc(r.until||'')+'"'+lk('ev.')+'></label>'+
       '<label class="chk"><input type="checkbox" data-path="ev.plist.'+i+'.on"'+(r.on!==false?' checked':'')+lk('ev.')+'> im Einsatz</label>'+
-      '<button class="ghost" data-delprice="'+i+'"'+lk('ev.')+'>Entfernen</button></div>';
+      (r.from?'<div class="hint" style="grid-column:1 / -1;margin:0">gilt ab '+esc(r.from)+' (Ende von Early)</div>':'')+
+      '<button class="ghost" style="grid-column:1 / -1" data-delprice="'+i+'"'+lk('ev.')+'>Entfernen</button></div>';
   }).join('');
   const others=S.events.filter(x=>x.id!==curId);
   let h='<h1>Anlass</h1>'+
-    '<div class="card"><h2>Dieser Anlass</h2><div class="fgrid">'+inp('ev.name','Name',{mode:'text'})+inp('ev.date','Datum',{type:'date'})+'</div></div>'+
-    '<div class="card"><h2>Preise für diesen Anlass</h2><div data-calc="price-status"></div>'+
+    '<div class="card"><h2>Dieser Anlass</h2><div class="fgrid">'+inp('ev.name','Name',{mode:'text',span:true})+inp('ev.date','Datum',{type:'date'})+'</div></div>'+
+    (isProd()?('<div class="card"><h2>Preise für diesen Anlass</h2><div data-calc="price-status"></div>'+
     '<p class="hint">Jeder Anlass hat eigene Preise. Wähle die Kategorie und trage den Preis ein. Jede Kategorie gibt es nur einmal. Gratis-Kategorien (GL, Member, Gutschein) brauchen keinen Preis. </p>'+
     priceRows+
     '<p class="hint" style="margin:8px 0 0">Preise von Listen (z. B. Friendsliste) legst du beim Anlegen der Liste im Tab Liste fest. Aktuell: '+E().lists.map(l=>esc(l.name)+' '+((num(l.price)>0)?'CHF '+chfs(num(l.price)):'gratis')).join(', ')+'.</p>'+
@@ -1224,7 +1373,7 @@ function viewEv(){
       TERM_NRS.map(n=>{ const used=E().terms.some((x,j)=>j!==i&&String(x.nr)===String(n)); return '<option value="'+n+'"'+(String(t.nr)===String(n)?' selected':'')+(used?' disabled':'')+'>Nr. '+n+'</option>'; }).join('')+'</select></label>'+
       '<label class="f"><span>Wo im Einsatz</span><select data-path="ev.terms.'+i+'.use"'+lk('ev.')+'><option value="AK"'+(t.use==='AK'?' selected':'')+'>Abendkasse</option><option value="Garderobe"'+(t.use==='Garderobe'?' selected':'')+'>Garderobe</option></select></label>'+
       '<button class="ghost" data-delterm="'+i+'"'+lk('ev.')+'>Entfernen</button></div>').join('')+
-    '<div class="btns"><button class="ghost" data-act="addterm"'+((E().terms.length>=TERM_NRS.length||E().closed)?' disabled':'')+'>Terminal hinzufügen</button></div></div>'+
+    '<div class="btns"><button class="ghost" data-act="addterm"'+((E().terms.length>=TERM_NRS.length||E().closed)?' disabled':'')+'>Terminal hinzufügen</button></div></div>'):'')+
     '<div class="card"><h2>Anlässe verwalten</h2>'+
     S.events.map(x=>{
       const cur=x.id===curId, nb=x.nb, canDel=isAdmin()||(isProd()&&!nb&&!cartLen(x.id));
@@ -1234,6 +1383,7 @@ function viewEv(){
     '<div class="btns"><button class="primary" data-act="newevent">Neuen Anlass anlegen</button></div>';
   if(!isAdmin()&&S.events.some(x=>x.nb>0)) h+='<p class="hint" style="margin:10px 0 0">Anlässe mit Buchungen kann nur der Admin löschen.</p>';
   h+='</div>';
+  if(!isProd()) return h;
   if(isAdmin()){
     h+='<div class="card"><h2>Kategorien (Admin)</h2><p class="hint">Hier stehen die Kategorien an sich, ohne Preis. Preise und Einsatz legt die Produktion pro Anlass fest. Mit «Mitgliederliste» muss beim Kassieren eine Person gesucht werden. Listen für einen Anlass (GL, Friendsliste …) legt die Produktion im Tab Liste an.</p>'+
     S.cats.map((c,i)=>'<div class="crow">'+
@@ -1252,7 +1402,7 @@ function viewEv(){
     h+='<div class="card"><h2>Konten (Admin)</h2><p class="hint">Neue Konten legst du im Supabase-Dashboard unter Authentication an. Hier gibst du sie frei und setzt die Rolle.</p>'+
       T.profiles.map((p,i)=>{ const self=me&&p.id===me.id;
         return '<div class="crow"><div><b>'+esc(p.display_name||'(ohne Name)')+'</b>'+(self?' (du)':'')+'</div><div class="row2"><select data-pi="'+i+'" data-f="role" aria-label="Rolle"'+(self?' disabled':'')+'>'+
-          ['kasse','garderobe','produktion','admin'].map(r=>'<option value="'+r+'"'+(p.role===r?' selected':'')+'>'+DBROLE[r]+'</option>').join('')+'</select>'+
+          ['kasse','garderobe','booking','produktion','admin'].map(r=>'<option value="'+r+'"'+(p.role===r?' selected':'')+'>'+DBROLE[r]+'</option>').join('')+'</select>'+
           '<label class="chk"><input type="checkbox" data-pi="'+i+'" data-f="active"'+(p.active?' checked':'')+(self?' disabled':'')+'> freigegeben</label></div></div>'; }).join('')+'</div>';
   }
   return h;
@@ -1301,11 +1451,12 @@ function errorHtml(){
     '<div class="btns"><button class="ghost" data-act="logout">Abmelden</button><button class="ghost" data-act="resetconfig">Server ändern</button></div>';
 }
 function noEventHtml(){
-  return '<h1>Kein Anlass</h1>'+(isProd()?'<p>Es gibt noch keinen Anlass. Lege den ersten an.</p><div class="btns"><button class="primary" data-act="newevent">Neuen Anlass anlegen</button></div>':'<p class="hint">Es ist noch kein Anlass angelegt. Die Produktion legt ihn an.</p>');
+  return '<h1>Kein Anlass</h1>'+(isPlanner()?'<p>Es gibt noch keinen Anlass. Lege den ersten an.</p><div class="btns"><button class="primary" data-act="newevent">Neuen Anlass anlegen</button></div>':'<p class="hint">Es ist noch kein Anlass angelegt. Die Produktion legt ihn an.</p>');
 }
 function renderBoot(){
+  document.body.classList.toggle('pub',boot==='invite');
   $('nav').innerHTML=''; $('#cartbar').hidden=true; $('#cartbar').innerHTML=''; $('#app').classList.remove('hasbar');
-  $('#app').innerHTML = boot==='config'?configHtml(): boot==='login'?loginHtml(): boot==='waiting'?waitingHtml(): boot==='error'?errorHtml(): '<p class="empty">Wird geladen …</p>';
+  $('#app').innerHTML = boot==='invite'?inviteHtml(): boot==='config'?configHtml(): boot==='login'?loginHtml(): boot==='waiting'?waitingHtml(): boot==='error'?errorHtml(): '<p class="empty">Wird geladen …</p>';
 }
 function render(keepScroll){
   if(boot!=='ready'){ renderBoot(); return; }
@@ -1467,6 +1618,8 @@ sheet.addEventListener('click',e=>{
   }
   const b=e.target.closest('[data-sh]'); if(!b) return;
   if(b.dataset.sh==='cancel'||b.dataset.sh==='done'){ closeSheet(); return; }
+  if(b.dataset.sh==='copylink'){ if(lastLink) copyText(lastLink.url); return; }
+  if(b.dataset.sh==='sharelink'){ if(lastLink&&navigator.share) navigator.share({title:'Gästeliste eintragen',text:'Hier kannst du deine Gäste auf die Gästeliste setzen:',url:lastLink.url}).catch(()=>{}); return; }
   if(b.dataset.sh==='logout'){ closeSheet(); doLogout(); return; }
   if(b.dataset.sh==='ok'){
     const cat=findCat(b.dataset.id), q=num($('#shQty').value), am=num($('#shAmt').value);
@@ -1506,6 +1659,13 @@ $('#app').addEventListener('click', async e => {
   const t = e.target.closest('button'); if (!t) return;
   const d = t.dataset;
   /* Start- und Anmeldebildschirme */
+  if (boot === 'invite') {
+    if (d.act === 'inv-add') { if (inv.rows.length < 20) inv.rows.push({ name: '', size: 1 }); return render(); }
+    if (d.act === 'inv-del') { inv.rows.splice(+d.i, 1); if (!inv.rows.length) inv.rows.push({ name: '', size: 1 }); return render(); }
+    if (d.act === 'inv-send') return submitInvite();
+    if (d.act === 'inv-more') { inv.done = null; inv.err = ''; return render(); }
+    return;
+  }
   if (d.act === 'login') return doLogin();
   if (d.act === 'saveconfig') {
     const url = ($('#cfgUrl').value || '').trim().replace(/\/+$/, ''), key = ($('#cfgKey').value || '').trim();
@@ -1542,14 +1702,14 @@ $('#app').addEventListener('click', async e => {
     enqueue({ kind: 'storno', id: uuid(), event: curId, original: last.tx, ts: Date.now() });
   }
   else if (d.gplus) {
-    if (!isProd()) return denied(); if (blocked()) return;
+    if (!isPlanner()) return denied(); if (blocked()) return;
     const g = T.guests.find(x => x.id === d.gplus); if (!g) return;
     writeRows('list_guests', sb.from('list_guests').update({ party_size: g.party_size + 1 }).eq('id', g.id).select());
   }
   else if (d.gdel) {
     const isM = T.members.some(m => m.id === d.gdel);
     if (isM) { if (!isAdmin()) return denied(); writeRows('members', sb.from('members').update({ active: false }).eq('id', d.gdel).select()); }
-    else { if (!isProd()) return denied(); if (blocked()) return; deleteRows('list_guests', sb.from('list_guests').delete().eq('id', d.gdel).select(), { id: d.gdel }); }
+    else { if (!isPlanner()) return denied(); if (blocked()) return; deleteRows('list_guests', sb.from('list_guests').delete().eq('id', d.gdel).select(), { id: d.gdel }); }
   }
   else if (d.delterm) {
     if (!isProd()) return denied(); if (blocked()) return;
@@ -1586,7 +1746,7 @@ $('#app').addEventListener('click', async e => {
     const from = $('#copyFrom').value; if (!from) return;
     const src = await run(sb.from('event_prices').select('*').eq('event_id', from)); if (!src) return;
     const del = await run(sb.from('event_prices').delete().eq('event_id', curId).select()); if (!del) return;
-    if (src.length) await run(sb.from('event_prices').insert(src.map(r => ({ event_id: curId, category_id: r.category_id, price: r.price, active: r.active })))) ;
+    if (src.length) await run(sb.from('event_prices').insert(src.map(r => ({ event_id: curId, category_id: r.category_id, price: r.price, active: r.active, valid_until: r.valid_until || null })))) ;
     await reloadPrices(); toast('Preise übernommen. Bitte kurz prüfen.');
   }
   else if (d.act === 'addcat') { if (!isAdmin()) return denied(); writeRows('categories', sb.from('categories').insert({ id: 'c' + uid(), name: 'Neue Kategorie', kind: 'paid', sort: 200 }).select()); }
@@ -1596,7 +1756,7 @@ $('#app').addEventListener('click', async e => {
     confirmTap(t, 'delcat' + c.id, () => deleteRows('categories', sb.from('categories').delete().eq('id', c.id).select(), c), 'Sicher? Nochmals tippen');
   }
   else if (d.act === 'newevent') {
-    if (!isProd()) return denied();
+    if (!isPlanner()) return denied();
     const rows = await run(sb.from('events').insert({ name: 'Neuer Anlass', event_date: today() }).select());
     if (rows && rows[0]) { upsertLocal('events', rows[0]); await loadStatic(); syncS(); await selectEvent(rows[0].id); render(); toast('Anlass angelegt. Bitte Namen, Preise, Stock und Terminals eintragen.'); }
   }
@@ -1619,8 +1779,32 @@ $('#app').addEventListener('click', async e => {
     else { const now = new Date(), from = new Date(now.getTime() - mins * 60000); rFrom = pad2(from.getHours()) + ':' + pad2(from.getMinutes()); rTo = pad2(now.getHours()) + ':' + pad2(now.getMinutes()); }
     $('#rFrom').value = rFrom; $('#rTo').value = rTo; $('#rangeOut').innerHTML = rangeHtml();
   }
+  else if (d.act === 'addinvite') {
+    if (!isPlanner()) return denied(); if (blocked()) return;
+    const list = $('#invList').value, via = ($('#invVia').value || '').trim(), quota = num($('#invQuota').value), exp = $('#invExp').value;
+    if (!via) { $('#invErr').textContent = 'Bitte eintragen, von wem die Gäste kommen (z. B. Name der Band).'; return; }
+    if (quota == null || quota < 1 || !Number.isInteger(quota)) { $('#invErr').textContent = 'Anzahl Personen als ganze Zahl eintragen.'; return; }
+    let expIso = null;
+    if (exp) { const a = exp.split('-').map(Number); expIso = new Date(a[0], a[1] - 1, a[2], 23, 59, 59).toISOString(); }
+    $('#invErr').textContent = '';
+    const r = await run(sb.rpc('create_invite', { p_event: curId, p_list: list, p_via: via, p_quota: quota, p_expires: expIso }));
+    if (r) {
+      const url = location.origin + location.pathname + '#einladung=' + r;
+      const inv = await sb.from('invite_links').select('id,event_id,list_id,via,quota,used,expires_at,revoked,created_at').eq('event_id', curId).order('created_at');
+      if (inv.data) { T.invites = inv.data; mark(); }
+      openLink(url, via);
+    }
+  }
+  else if (d.invrev) {
+    if (!isPlanner()) return denied();
+    confirmTap(t, 'invrev' + d.invrev, () => writeRows('invite_links', sb.from('invite_links').update({ revoked: true }).eq('id', d.invrev).select()), 'Sicher? Nochmals tippen');
+  }
+  else if (d.padd) {
+    const g = allGuests().find(x => x.id === d.padd); if (!g) return;
+    if (cartAddGuest(g)) render(true);
+  }
   else if (d.act === 'addlist') {
-    if (!isProd()) return denied(); if (blocked()) return;
+    if (!isPlanner()) return denied(); if (blocked()) return;
     const name = ($('#lName').value || '').trim(), ptxt = ($('#lPrice').value || '').trim(), pr = num(ptxt);
     if (!name) { $('#lErr').textContent = 'Name der Liste eintragen.'; return; }
     if (E().lists.some(l => norm(l.name) === norm(name))) { $('#lErr').textContent = 'Eine Liste mit diesem Namen gibt es schon.'; return; }
@@ -1629,7 +1813,7 @@ $('#app').addEventListener('click', async e => {
     if (rows) toast('Liste «' + name + '» angelegt' + (pr > 0 ? ' (CHF ' + chfs(pr) + ')' : ' (gratis)'));
   }
   else if (d.dellist) {
-    if (!isProd()) return denied(); if (blocked()) return;
+    if (!isPlanner()) return denied(); if (blocked()) return;
     const l = T.lists.find(x => x.id === d.dellist); if (!l || l.is_default) return;
     if (T.guests.some(g => g.list_id === l.id && guestIn(g.id) > 0)) { toast('Es sind schon Gäste dieser Liste eingelassen.'); return; }
     confirmTap(t, 'dellist' + l.id, async () => {
@@ -1638,7 +1822,7 @@ $('#app').addEventListener('click', async e => {
     }, 'Sicher? Nochmals tippen');
   }
   else if (d.act === 'addguest') {
-    if (!isProd()) return denied(); if (blocked()) return;
+    if (!isPlanner()) return denied(); if (blocked()) return;
     const name = $('#gName').value.trim(), n = num($('#gN').value);
     if (!name) { $('#gErr').textContent = 'Name eintragen.'; return; }
     if (n == null || n < 1 || !Number.isInteger(n)) { $('#gErr').textContent = 'Anzahl als ganze Zahl eintragen.'; return; }
@@ -1646,7 +1830,7 @@ $('#app').addEventListener('click', async e => {
     if (k) { toast(name + ' hinzugefügt'); const f = $('#gName'); if (f) f.focus(); }
   }
   else if (d.act === 'importguests') {
-    if (!isProd()) return denied(); if (blocked()) return;
+    if (!isPlanner()) return denied(); if (blocked()) return;
     const arr = parseImport($('#gImp').value);
     if (!arr.length) { $('#gImpErr').textContent = 'Keine Namen gefunden.'; return; }
     const k = await addGuestsServer(arr, $('#gImpList').value);
@@ -1681,8 +1865,13 @@ async function refreshSoftForce(){ try { await loadStatic(); if (curId) await lo
 
 $('#app').addEventListener('input', e => {
   const t = e.target;
+  if (boot === 'invite') {
+    if (t.dataset.ir !== undefined) { const r = inv.rows[+t.dataset.ir]; if (r) { r[t.dataset.f] = t.value; const el = $('#invTot'); if (el) el.innerHTML = 'Eingetragen: <b>' + invTotal() + '</b> von ' + inv.info.remaining; if (t.dataset.f === 'size') { /* keine Neuzeichnung noetig */ } } }
+    return;
+  }
   if (t.id === 'evSel') { selectEvent(t.value).then(() => render()); return; }
   if (t.id === 'rFrom' || t.id === 'rTo') { rFrom = $('#rFrom').value; rTo = $('#rTo').value; $('#rangeOut').innerHTML = rangeHtml(); return; }
+  if (t.id === 'pSearch') { pQuery = t.value; $('#pResults').innerHTML = pResultsHtml(); return; }
   if (t.id === 'gSearch') { gSearch = t.value; $('#glList').innerHTML = guestRows(); return; }
   if (t.dataset.path) {
     if (E().closed && t.dataset.path.indexOf('ev.') === 0) return;
