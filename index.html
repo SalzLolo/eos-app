@@ -275,6 +275,7 @@ nav.dense button{flex:1 1 auto;font-size:.7rem;padding:0 2px;letter-spacing:-.01
 .evrow{flex-wrap:wrap}
 .evrow>div:first-child{flex:1 1 140px;min-width:0}
 .evbtn button{padding:0 12px}
+.ver{text-align:center;color:var(--muted);font-size:.75rem;margin:28px 0 8px}
 .fgrp:first-child{margin-top:4px;border-top:0;padding-top:0}
 
 </style>
@@ -289,6 +290,9 @@ nav.dense button{flex:1 1 auto;font-size:.7rem;padding:0 2px;letter-spacing:-.01
 <script>
 (function(){
 'use strict';
+const APP_VERSION='1.0';
+const APP_DATE='12.10.2026';
+const verHtml=()=>'<p class="ver">EOS Version '+APP_VERSION+' · '+APP_DATE+'</p>';
 const PRICE_JACKE=2, PRICE_TASCHE=5;
 const ROLES={kasse:'Kasse',gard:'Garderobe',booking:'Booking',prod:'Produktion',admin:'Admin',beob:'Beobachter'};
 const TABS={kasse:['einlass','gl'],gard:['gard'],booking:['gl','ev'],prod:['einlass','gl','gard','ab','ev'],admin:['einlass','gl','gard','ab','ev','adm'],beob:['einlass','gl']};
@@ -1507,13 +1511,13 @@ function noEventHtml(){
 function renderBoot(){
   document.body.classList.toggle('pub',boot==='invite');
   $('nav').innerHTML=''; $('#cartbar').hidden=true; $('#cartbar').innerHTML=''; $('#app').classList.remove('hasbar');
-  $('#app').innerHTML = boot==='invite'?inviteHtml(): boot==='config'?configHtml(): boot==='login'?loginHtml(): boot==='waiting'?waitingHtml(): boot==='error'?errorHtml(): '<p class="empty">Wird geladen …</p>';
+  $('#app').innerHTML = (boot==='invite'?inviteHtml(): boot==='config'?configHtml(): boot==='login'?loginHtml(): boot==='waiting'?waitingHtml(): boot==='error'?errorHtml(): '<p class="empty">Wird geladen …</p>')+(boot==='invite'?'':verHtml());
 }
 function render(keepScroll){
   if(boot!=='ready'){ renderBoot(); return; }
   if(TABS[role].indexOf(tab)<0) tab=TABS[role][0];
   const y=window.scrollY, e=E();
-  $('#app').innerHTML=topbar()+(e.none?noEventHtml():((e.closed?closedBanner():'')+VIEWS[tab]()));
+  $('#app').innerHTML=topbar()+(e.none?noEventHtml():((e.closed?closedBanner():'')+VIEWS[tab]()))+verHtml();
   renderNav(); renderCartBar(); if(!e.none) recompute();
   window.scrollTo(0,keepScroll?y:0);
 }
@@ -1627,7 +1631,7 @@ function openSearch(cat){
 function openAccount(){
   sheet.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="Konto"><h2>Konto</h2>'+
     '<p><b>'+esc((profile&&profile.display_name)||(me&&me.email)||'')+'</b><br><span class="hint">'+esc((me&&me.email)||'')+' · Rolle '+ROLES[role]+'</span></p>'+
-    '<p class="hint">Server: '+esc((cfg().url||'').replace(/^https?:\/\//,''))+'<br>Gerät: '+esc(DEVICE)+'</p>'+
+    '<p class="hint">Version '+APP_VERSION+' vom '+APP_DATE+'<br>Server: '+esc((cfg().url||'').replace(/^https?:\/\//,''))+'<br>Gerät: '+esc(DEVICE)+'</p>'+
     '<div class="btns"><button class="ghost" data-sh="logout">Abmelden</button><button class="ghost" data-sh="cancel">Schliessen</button></div></div>';
   sheet.hidden=false;
 }
