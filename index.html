@@ -276,6 +276,9 @@ nav.dense button{flex:1 1 auto;font-size:.7rem;padding:0 2px;letter-spacing:-.01
 .evrow>div:first-child{flex:1 1 140px;min-width:0}
 .evbtn button{padding:0 12px}
 .ver{text-align:center;color:var(--muted);font-size:.75rem;margin:28px 0 8px}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.pager span{font-weight:700}
+.pager button{min-height:44px;min-width:56px;font-size:1.3rem}
 .fgrp:first-child{margin-top:4px;border-top:0;padding-top:0}
 
 </style>
@@ -290,7 +293,7 @@ nav.dense button{flex:1 1 auto;font-size:.7rem;padding:0 2px;letter-spacing:-.01
 <script>
 (function(){
 'use strict';
-const APP_VERSION='1.0';
+const APP_VERSION='1.1';
 const APP_DATE='12.10.2026';
 const verHtml=()=>'<p class="ver">EOS Version '+APP_VERSION+' · '+APP_DATE+'</p>';
 const PRICE_JACKE=2, PRICE_TASCHE=5;
@@ -336,6 +339,8 @@ let sb = null, me = null, profile = null;
 let boot = 'init';            // init | config | login | waiting | ready | error
 let bootMsg = '';
 let role = null, tab = 'einlass';
+let evQuery = '', evPage = 0;
+const EV_PER_PAGE = 8;
 let evMode = 'list', evDraft = { name: '', date: '', copyFrom: '', released: false };
 const isProd = () => role === 'prod' || role === 'admin';
 const isAdmin = () => role === 'admin';
@@ -1414,16 +1419,27 @@ function viewEv(){
   }
   evMode='list';
   let h='<h1>Anlass</h1><div class="card"><h2>Anlässe</h2><p class="hint">Wähle einen Anlass, um ihn zu bearbeiten, oder lege einen neuen an.</p>'+
-    S.events.map(x=>{
-      const cur=x.id===curId, nb=x.nb, canDel=isAdmin()||(isProd()&&!nb&&!cartLen(x.id));
-      return '<div class="evrow"><div><b>'+esc(x.name||'ohne Namen')+'</b>'+(cur?' (aktuell)':'')+'<div class="hint">'+dmy(x.date)+' · '+nb+(nb===1?' Buchung':' Buchungen')+(x.closed?' · abgeschlossen':'')+(!x.closed&&!x.released?' · nicht freigegeben':'')+'</div></div>'+
-        '<div class="evbtn"><button class="ghost" data-evedit="'+x.id+'">Bearbeiten</button>'+(isPlanner()?'<button class="danger" data-evdel="'+x.id+'"'+(canDel?'':' disabled')+'>Löschen</button>':'')+'</div></div>';
-    }).join('')+
+    '<label class="f" style="margin:0 0 8px"><span>Anlass suchen</span><input id="evSearch" type="text" value="'+esc(evQuery)+'" autocomplete="off" placeholder="Name oder Datum"></label>'+
+    '<div id="evList">'+evListHtml()+'</div>'+
     (isPlanner()?'<div class="btns"><button class="primary" data-act="evnew">Neuen Anlass anlegen</button></div>':'');
   if(!isAdmin()&&S.events.some(x=>x.nb>0)) h+='<p class="hint" style="margin:10px 0 0">Anlässe mit Buchungen kann nur der Admin löschen.</p>';
   h+='</div>';
   if(isPlanner()) h+=catsCard();
   return h;
+}
+function evListHtml(){
+  const q=norm(evQuery.trim());
+  const all=S.events.filter(x=>!q||norm((x.name||'')+' '+dmy(x.date)+' '+x.date).indexOf(q)>=0);
+  const pages=Math.max(1,Math.ceil(all.length/EV_PER_PAGE));
+  if(evPage>=pages) evPage=pages-1; if(evPage<0) evPage=0;
+  const rows=all.slice(evPage*EV_PER_PAGE,(evPage+1)*EV_PER_PAGE).map(x=>{
+    const cur=x.id===curId, nb=x.nb, canDel=isAdmin()||(isProd()&&!nb&&!cartLen(x.id));
+    return '<div class="evrow"><div><b>'+esc(x.name||'ohne Namen')+'</b>'+(cur?' (aktuell)':'')+'<div class="hint">'+dmy(x.date)+' · '+nb+(nb===1?' Buchung':' Buchungen')+(x.closed?' · abgeschlossen':'')+(!x.closed&&!x.released?' · nicht freigegeben':'')+'</div></div>'+
+      '<div class="evbtn"><button class="ghost" data-evedit="'+x.id+'">Bearbeiten</button>'+(isPlanner()?'<button class="danger" data-evdel="'+x.id+'"'+(canDel?'':' disabled')+'>Löschen</button>':'')+'</div></div>';
+  }).join('');
+  const count='<p class="hint" style="margin:0 0 4px">'+(q?all.length+' von '+S.events.length+' Anlässen':S.events.length+(S.events.length===1?' Anlass':' Anlässe'))+'</p>';
+  const pager=pages>1?'<div class="pager"><button class="ghost" data-evpage="prev"'+(evPage===0?' disabled':'')+' aria-label="Vorherige Seite">‹</button><span>Seite '+(evPage+1)+' von '+pages+'</span><button class="ghost" data-evpage="next"'+(evPage>=pages-1?' disabled':'')+' aria-label="Nächste Seite">›</button></div>':'';
+  return count+(rows||'<p class="empty">Kein Anlass gefunden.</p>')+pager;
 }
 function evNewHtml(){
   const others=S.events;
@@ -1810,6 +1826,7 @@ $('#app').addEventListener('click', async e => {
     if (!isPlanner()) return denied();
     evDraft = { name: '', date: today(), copyFrom: '', released: false }; evMode = 'new'; tab = 'ev'; render();
   }
+  else if (d.evpage) { evPage += d.evpage === 'next' ? 1 : -1; const el = $('#evList'); if (el) el.innerHTML = evListHtml(); }
   else if (d.act === 'evcancel') { evMode = 'list'; render(); }
   else if (d.act === 'evdone') { evMode = 'list'; render(); }
   else if (d.act === 'evcreate') {
@@ -1936,6 +1953,7 @@ $('#app').addEventListener('input', e => {
   if (t.dataset.draft) { evDraft[t.dataset.draft] = t.type === 'checkbox' ? t.checked : t.value; return; }
   if (t.id === 'evSel') { selectEvent(t.value).then(() => render()); return; }
   if (t.id === 'rFrom' || t.id === 'rTo') { rFrom = $('#rFrom').value; rTo = $('#rTo').value; $('#rangeOut').innerHTML = rangeHtml(); return; }
+  if (t.id === 'evSearch') { evQuery = t.value; evPage = 0; $('#evList').innerHTML = evListHtml(); return; }
   if (t.id === 'pSearch') { pQuery = t.value; $('#pResults').innerHTML = pResultsHtml(); return; }
   if (t.id === 'gSearch') { gSearch = t.value; $('#glList').innerHTML = guestRows(); return; }
   if (t.dataset.path) {
