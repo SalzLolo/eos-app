@@ -299,9 +299,40 @@ nav.dense button{flex:1 1 auto;font-size:.7rem;padding:0 2px;letter-spacing:-.01
 <script>
 (function(){
 'use strict';
-const APP_VERSION='1.2';
-const APP_DATE='14.10.2026';
+const APP_VERSION='1.4';
+const APP_DATE='16.10.2026';
 const HELP = {
+  start: {
+    name: "Erste Schritte",
+    intro: "EOS ist die App für Einlass, Gästelisten, Garderobe und Abrechnung im Salzhaus. Sie läuft im Browser, du musst nichts installieren. Adresse: https://salzlolo.github.io/eos-app/",
+    blocks: [
+      { tab: null, h: "Anmelden", kind: "steps", items: [
+        "Die Adresse im Browser öffnen (Safari oder Chrome). Am einfachsten über den QR-Code oder ein Lesezeichen.",
+        "E-Mail und Passwort eintragen und «Anmelden» tippen. Die Zugangsdaten bekommst du vom Admin.",
+        "Danach landest du in deinem Bereich. Unten siehst du die Tabs deiner Rolle.",
+        "Oben den richtigen Anlass prüfen. Für die Kasse und die Garderobe erscheinen nur freigegebene, offene Anlässe."
+      ]},
+      { tab: null, h: "Wenn die Anmeldung nicht klappt", kind: "list", items: [
+        "«E-Mail oder Passwort stimmt nicht»: Tippfehler prüfen. Passwort vergessen: den Admin melden, er setzt ein neues.",
+        "«Konto noch nicht freigegeben»: Ein Admin muss dein Konto freigeben und dir eine Rolle geben. Danach «Nochmals prüfen» tippen.",
+        "«Keine Verbindung zum Server»: Netz oder WLAN prüfen und die Seite neu laden.",
+        "«Aus Sicherheitsgründen automatisch abgemeldet»: Das passiert jeden Morgen um 8 Uhr. Einfach neu anmelden.",
+        "Den Link «Server ändern» unter dem Login nicht antippen. Er ist nur für die Einrichtung."
+      ]},
+      { tab: null, h: "Auf dem Handy einrichten", kind: "list", items: [
+        "iPhone (Safari): Teilen-Symbol, dann «Zum Home-Bildschirm». Android (Chrome): Menü ⋮, dann «Zum Startbildschirm hinzufügen».",
+        "So öffnest du die App mit einem Tipp, ohne die Adresse einzutippen."
+      ]},
+      { tab: null, h: "Allgemeine Hinweise", kind: "tips", items: [
+        "Du wirst automatisch abgemeldet, am nächsten Morgen um 8 Uhr nach der Anmeldung. Melde dich nach dem Anlass trotzdem selbst ab (Rollen-Knopf oben rechts, dann «Abmelden»), vor allem auf privaten oder geteilten Geräten.",
+        "Jede Person hat ein eigenes Konto. Das Passwort nicht weitergeben.",
+        "Oben rechts öffnet das «?» die Anleitung für deine Rolle.",
+        "Läuft etwas komisch, die Seite neu laden, nicht abmelden. Wartende Buchungen bleiben auf dem Gerät erhalten.",
+        "Nach einem Update die Seite neu laden. Die Version steht ganz unten auf jeder Seite.",
+        "Gerät vor dem Anlass laden, wenn möglich eine Powerbank bereithalten."
+      ]}
+    ]
+  },
   kasse: {
     name: "Kasse",
     intro: "Du kassierst an der Abendkasse und lässt Gäste von den Listen ein. Du siehst nur Anlässe, die freigegeben und noch nicht abgeschlossen sind.",
@@ -767,10 +798,10 @@ function availabilitySig(){ try { return evCats().filter(c => isOn(c)).map(c => 
 function startLoops(){
   clearInterval(loopT);
   clearInterval(availT); availT = setInterval(() => { if (boot !== 'ready' || document.hidden) return; const sg = availabilitySig(); if (sg !== availSig) { availSig = sg; scheduleRender(); } }, 10000);
-  loopT = setInterval(() => { if (document.hidden) return; flush(); if (rtState !== 'live' || Date.now() - lastFull > 60000) refreshSoft(); }, 15000);
+  loopT = setInterval(() => { if (document.hidden) return; if (checkExpiry()) return; flush(); if (rtState !== 'live' || Date.now() - lastFull > 60000) refreshSoft(); }, 15000);
 }
 window.addEventListener('online', () => { flush(); refreshSoft(); });
-document.addEventListener('visibilitychange', () => { if (!document.hidden && boot === 'ready') { flush(); refreshSoft(); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && boot === 'ready') { if (checkExpiry()) return; flush(); refreshSoft(); } });
 window.addEventListener('pagehide', () => { flushWrites(); });
 
 /* ---------- Server: Warteschlange fuer Buchungen (funktioniert auch ohne Netz) ---------- */
@@ -1000,7 +1031,9 @@ async function start(){
   if (!initClient()) { boot = 'config'; render(); return; }
   let s;
   try { s = await sb.auth.getSession(); } catch(e) { boot = 'error'; bootMsg = 'Keine Verbindung zum Server.'; render(); return; }
-  if (!s.data || !s.data.session) { boot = 'login'; render(); return; }
+  if (!s.data || !s.data.session) { clearExp(); boot = 'login'; render(); return; }
+  if (sessionExpired()) { try { await sb.auth.signOut(); } catch(e) {} clearExp(); loginNote = 'Aus Sicherheitsgründen wurdest du automatisch abgemeldet. Bitte melde dich neu an.'; boot = 'login'; render(); return; }
+  if (!getExp()) setExp(nextExpiry(Date.now()));
   await afterLogin(s.data.session.user);
 }
 async function afterLogin(user){
@@ -1026,9 +1059,28 @@ async function doLogin(){
   let r;
   try { r = await sb.auth.signInWithPassword({ email: mail, password: pw }); } catch(e) { $('#lgErr').textContent = 'Keine Verbindung zum Server.'; return; }
   if (r.error) { $('#lgErr').textContent = /invalid/i.test(r.error.message) ? 'E-Mail oder Passwort stimmt nicht.' : r.error.message; return; }
+  loginNote = ''; setExp(nextExpiry(Date.now()));
   await afterLogin(r.data.user);
 }
-async function doLogout(){ flushWrites(); try { await sb.auth.signOut(); } catch(e) {} resetSession(); boot = 'login'; render(); }
+/* Automatische Abmeldung: am naechsten Morgen um 8 Uhr (mindestens 6 Stunden nach der Anmeldung) */
+const EXP_KEY = 'eos-exp', EXP_HOUR = 8, EXP_MIN_H = 6;
+let loginNote = '';
+function nextExpiry(from){
+  const d = new Date(from), e = new Date(d.getFullYear(), d.getMonth(), d.getDate(), EXP_HOUR, 0, 0, 0);
+  while (e.getTime() - d.getTime() < EXP_MIN_H * 3600000) e.setDate(e.getDate() + 1);
+  return e.getTime();
+}
+function getExp(){ try { return +localStorage.getItem(EXP_KEY) || 0; } catch(e) { return 0; } }
+function setExp(t){ try { localStorage.setItem(EXP_KEY, String(t)); } catch(e) {} }
+function clearExp(){ try { localStorage.removeItem(EXP_KEY); } catch(e) {} }
+function sessionExpired(){ const x = getExp(); return x > 0 && Date.now() >= x; }
+function checkExpiry(){
+  if (boot !== 'ready' || !sessionExpired()) return false;
+  if (outbox.some(o => !o.failed)) return false;          // wartende Buchungen zuerst senden
+  loginNote = 'Aus Sicherheitsgründen wurdest du automatisch abgemeldet. Bitte melde dich neu an.';
+  closeSheet(); doLogout(true); return true;
+}
+async function doLogout(auto){ if (auto !== true) loginNote = ''; flushWrites(); clearExp(); try { await sb.auth.signOut(); } catch(e) {} resetSession(); boot = 'login'; render(); }
 async function selectEvent(id){
   flushWrites();
   curId = id; try { localStorage.setItem('eos-cur', id); } catch(e) {}
@@ -1683,9 +1735,10 @@ function configHtml(){
     '<div class="err" id="cfgErr" role="alert"></div><div class="btns"><button class="primary" data-act="saveconfig">Speichern und starten</button></div>';
 }
 function loginHtml(){
-  return '<h1>Anmelden</h1><label class="f"><span>E-Mail</span><input id="lgMail" type="email" autocomplete="username"></label>'+
+  return '<h1>Anmelden</h1>'+(loginNote?'<p class="note" role="status">'+esc(loginNote)+'</p>':'')+'<label class="f"><span>E-Mail</span><input id="lgMail" type="email" autocomplete="username"></label>'+
     '<label class="f" style="margin-top:10px"><span>Passwort</span><input id="lgPw" type="password" autocomplete="current-password"></label>'+
     '<div class="err" id="lgErr" role="alert"></div><div class="btns"><button class="primary" data-act="login">Anmelden</button></div>'+
+    '<details class="helpblk" style="margin-top:18px"><summary>Hilfe zur Anmeldung</summary><p class="hint" style="margin:8px 0">'+esc(HELP.start.intro)+'</p>'+helpHtml('start',true)+'</details>'+
     '<p class="hint" style="margin-top:14px"><button class="link" data-act="resetconfig">Server ändern</button></p>';
 }
 function waitingHtml(){
@@ -1822,17 +1875,17 @@ function openSearch(cat){
 function openAccount(){
   sheet.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="Konto"><h2>Konto</h2>'+
     '<p><b>'+esc((profile&&profile.display_name)||(me&&me.email)||'')+'</b><br><span class="hint">'+esc((me&&me.email)||'')+' · Rolle '+ROLES[role]+'</span></p>'+
-    '<p class="hint">Version '+APP_VERSION+' vom '+APP_DATE+'<br>Server: '+esc((cfg().url||'').replace(/^https?:\/\//,''))+'<br>Gerät: '+esc(DEVICE)+'</p>'+
+    '<p class="hint">Automatische Abmeldung: '+(getExp()?new Date(getExp()).toLocaleString('de-CH',{weekday:'short',hour:'2-digit',minute:'2-digit'}):'–')+'<br>Version '+APP_VERSION+' vom '+APP_DATE+'<br>Server: '+esc((cfg().url||'').replace(/^https?:\/\//,''))+'<br>Gerät: '+esc(DEVICE)+'</p>'+
     '<div class="btns"><button class="ghost" data-sh="help">Anleitung</button></div>'+
     '<div class="btns"><button class="ghost" data-sh="logout">Abmelden</button><button class="ghost" data-sh="cancel">Schliessen</button></div></div>';
   sheet.hidden=false;
 }
 const HELP_KEY={kasse:'kasse',gard:'gard',booking:'booking',prod:'prod',admin:'admin',beob:'beob'};
-function helpHtml(rk){
+function helpHtml(rk,noCtx){
   const hp=HELP[rk]||HELP[HELP_KEY[role]]; if(!hp) return '';
-  const hasTab=hp.blocks.some(b=>b.tab===tab);
+  const hasTab=!noCtx&&hp.blocks.some(b=>b.tab===tab);
   const blocks=hp.blocks.map((b,i)=>{
-    const open=hasTab?(b.tab===tab):(i===0);
+    const open=noCtx?false:(hasTab?(b.tab===tab):(i===0));
     const li=b.items.map(x=>'<li>'+esc(x)+'</li>').join('');
     return '<details class="helpblk'+(b.kind==='tips'?' tip':'')+'"'+(open?' open':'')+'><summary>'+esc(b.h)+'</summary>'+(b.kind==='steps'?'<ol>'+li+'</ol>':'<ul>'+li+'</ul>')+'</details>';
   }).join('');
