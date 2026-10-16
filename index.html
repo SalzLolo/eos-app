@@ -279,6 +279,12 @@ nav.dense button{flex:1 1 auto;font-size:.7rem;padding:0 2px;letter-spacing:-.01
 .pager{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
 .pager span{font-weight:700}
 .pager button{min-height:44px;min-width:56px;font-size:1.3rem}
+.helpbtn{padding:0;min-width:46px;font-size:1.2rem}
+.helpblk{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 8px}
+.helpblk summary{font-weight:700;color:var(--ink);cursor:pointer;margin:0}
+.helpblk ol,.helpblk ul{padding-left:20px;margin:8px 0 0}
+.helpblk li{margin:0 0 6px}
+.helpblk.tip{background:var(--note-bg,rgba(240,180,30,.12))}
 .fgrp:first-child{margin-top:4px;border-top:0;padding-top:0}
 
 </style>
@@ -293,8 +299,176 @@ nav.dense button{flex:1 1 auto;font-size:.7rem;padding:0 2px;letter-spacing:-.01
 <script>
 (function(){
 'use strict';
-const APP_VERSION='1.1';
-const APP_DATE='12.10.2026';
+const APP_VERSION='1.2';
+const APP_DATE='14.10.2026';
+const HELP = {
+  kasse: {
+    name: "Kasse",
+    intro: "Du kassierst an der Abendkasse und lässt Gäste von den Listen ein. Du siehst nur Anlässe, die freigegeben und noch nicht abgeschlossen sind.",
+    blocks: [
+      { tab: "einlass", h: "Einkassieren", kind: "steps", items: [
+        "Oben prüfen, dass der richtige Anlass gewählt ist.",
+        "Unter «Abendkasse: Kategorien zum Tippen» die Kategorie antippen, einmal pro Person. Sie landet im Warenkorb.",
+        "Bei «Betrag frei» erst Anzahl und Gesamtbetrag eintragen.",
+        "Unten «Bar einkassieren» oder «Karte einkassieren» tippen. Erst jetzt ist die Buchung gespeichert.",
+        "Liegen nur Gratis-Kategorien im Warenkorb, heisst der Knopf «Einlassen»."
+      ]},
+      { tab: "einlass", h: "Person von einer Liste einlassen", kind: "steps", items: [
+        "Im Feld «Person auf einer Liste suchen» den Namen eintippen. Gefunden wird auf allen Listen (GL, Friendsliste, Member).",
+        "«Hinzufügen» tippen. Die Person liegt im Warenkorb und wird wie oben einkassiert oder eingelassen.",
+        "Steht ein Name mit Begleitung auf der Liste, jede Person einzeln hinzufügen. Der Zähler zeigt zum Beispiel «1 / 3 eingelassen».",
+        "Alternativ im Tab «Liste» den Namen suchen und «Einlassen» tippen."
+      ]},
+      { tab: "einlass", h: "Fehler korrigieren", kind: "list", items: [
+        "Falsch gebucht: unter «Letzte Buchungen» bei der Buchung «Stornieren» tippen. Dabei wird nichts gelöscht, die ganze Buchung wird gegengebucht. Danach richtig neu buchen.",
+        "Person versehentlich eingelassen: im Tab «Liste» bei der Person «−1» tippen.",
+        "Im Warenkorb ändern «−» und «+» die Anzahl, «Leeren» verwirft alles."
+      ]},
+      { tab: null, h: "Ohne Netz", kind: "list", items: [
+        "Weiterkassieren. Die Buchungen werden auf dem Gerät gespeichert und gesendet, sobald wieder Netz da ist.",
+        "Oben steht dann «Kein Netz» und «x Buchungen warten auf Senden». Gerät nicht ausschalten, bis die Zahl verschwunden ist.",
+        "Steht dort «abgelehnt»: antippen und den Grund lesen. «Nochmals» versucht es erneut. Bei «Verwerfen» wird die Buchung nicht erfasst. Dann die Produktion informieren, denn die Person war eventuell schon eingelassen."
+      ]},
+      { tab: null, h: "Gut zu wissen", kind: "tips", items: [
+        "Fehlt eine Kategorie oder steht «Preis fehlt»: Produktion fragen. Der Preis ist nicht eingetragen oder die Kategorie ist nicht im Einsatz.",
+        "Preise mit Zeitfenster (zum Beispiel «bis 22:00») wechseln von selbst.",
+        "Der Anlass fehlt in der Auswahl: Er ist noch nicht freigegeben oder schon abgeschlossen.",
+        "Bei zwei Kassengeräten sieht jedes die Buchungen des anderen sofort."
+      ]}
+    ]
+  },
+  gard: {
+    name: "Garderobe",
+    intro: "Du erfasst die Marken für Jacken (2.–) und Taschen (5.–). Den Abgleich mit dem Bargeld macht später die Produktion.",
+    blocks: [
+      { tab: "gard", h: "Marken erfassen", kind: "steps", items: [
+        "Oben den richtigen Anlass wählen.",
+        "Jacken und Taschen getrennt erfassen: «Erste Marke» und «Letzte Marke» eintragen.",
+        "Werden Marken im Lauf des Abends wiederverwendet, stattdessen «oder Anzahl direkt» eintragen (Gesamtzahl der ausgegebenen Marken).",
+        "Bei «davon ohne Bezahlung» die Marken eintragen, die gratis ausgegeben wurden.",
+        "Die Karte «Umsatz laut Marken» rechnet automatisch mit."
+      ]},
+      { tab: null, h: "Gut zu wissen", kind: "tips", items: [
+        "Eingaben werden beim Tippen automatisch gespeichert. Es gibt keinen Speichern-Knopf.",
+        "Bargeld und Kasse gibst du am Ende der Produktion ab. Sie zählt und trägt den Endbestand ein.",
+        "Steht oben «Kein Netz», prüfe nach der Rückkehr des Netzes, ob deine letzten Eingaben noch da sind.",
+        "Der Anlass fehlt in der Auswahl: Er ist noch nicht freigegeben oder schon abgeschlossen."
+      ]}
+    ]
+  },
+  prod: {
+    name: "Produktion",
+    intro: "Du bereitest Anlässe vor, hilfst bei Bedarf an der Kasse, zählst am Ende das Bargeld und schliesst den Anlass ab.",
+    blocks: [
+      { tab: "ev", h: "1. Anlass vorbereiten", kind: "steps", items: [
+        "Tab «Anlass», «Neuen Anlass anlegen». Name und Datum eintragen, wenn gewünscht Preise von einem früheren Anlass übernehmen, dann «Anlass speichern».",
+        "Preise: Kategorie und Preis eintragen. Bei Early «gilt bis» setzen, Normal beginnt danach automatisch. Reduzierte Stufen mit «Reduzierten Preis hinzufügen».",
+        "Stock Abendkasse und Garderobe eintragen: Was aus dem Tresor in die Kasse kommt.",
+        "Kartenterminals: Terminalnummer und Einsatzort (Abendkasse oder Garderobe) wählen.",
+        "Zum Schluss das Häkchen «Für Kasse, Garderobe und Beobachter sichtbar» setzen. Erst dann sehen sie den Anlass.",
+        "Änderungen im Anlass werden sofort gespeichert."
+      ]},
+      { tab: "gl", h: "2. Listen und Gäste", kind: "steps", items: [
+        "Tab «Liste». GL gibt es immer. Weitere Listen (zum Beispiel Friendsliste) mit «Liste anlegen». Mit Preis wird die Liste bezahlt, ohne Preis ist sie gratis.",
+        "Gäste einzeln hinzufügen oder mit «Liste für diesen Anlass einfügen» ganze Listen einfügen: ein Name pro Zeile, zum Beispiel «Name +2; Von».",
+        "Bands oder Agenturen tragen ihre Gäste selbst ein: «Einladungslinks», Link erstellen, Personenzahl festlegen und weitergeben. Der Link wird nur einmal angezeigt.",
+        "Die Mitgliederliste pflegt nur der Admin."
+      ]},
+      { tab: "einlass", h: "3. An der Kasse", kind: "list", items: [
+        "Du kassierst wie die Kasse (siehe Merkblatt Kasse).",
+        "Stornieren ist möglich, solange der Anlass offen ist."
+      ]},
+      { tab: "ab", h: "4. Nach dem Anlass: Abschluss", kind: "steps", items: [
+        "Tab «Abschluss». Bargeld zählen und für Abendkasse und Garderobe Münz, Münzrollen und Noten eintragen (hier gibt es auch 200er und 100er).",
+        "«Tagesabschluss der Terminals»: den Betrag jedes Terminals eintragen.",
+        "«Gutscheine und VVK»: eingezogene Gutscheine und am Scanner eingelassene VVK eintragen.",
+        "Oben die Anzeige prüfen. «Differenz» heisst: Zählung und System stimmen nicht überein. Dann zuerst nachzählen."
+      ]},
+      { tab: "ab", h: "5. Ins Formular eintragen", kind: "steps", items: [
+        "Karte «Ins Formular eintragen» öffnen und der Reihe nach vorgehen: Umsatzentwicklung, TresorBar (Anfang), BarTresor (Ende), Kontrolle.",
+        "Die Werte ins Excel-Formular übertragen. «Als Text kopieren» gibt alles als Text.",
+        "Kontrolle in der Umsatzentwicklung: Noten und Rollen müssen mit der App übereinstimmen. Die Umsätze rechnet das Formular selbst."
+      ]},
+      { tab: "ab", h: "6. Anlass abschliessen", kind: "tips", items: [
+        "Ganz unten «Anlass abschliessen». Danach sind Buchungen, Listen, Preise und Zählungen gesperrt. Kasse und Garderobe sehen den Anlass nicht mehr.",
+        "Nur der Admin kann ihn wieder öffnen. Vorher prüfen: Formular fertig, Differenzen geklärt."
+      ]}
+    ]
+  },
+  booking: {
+    name: "Booking",
+    intro: "Du bereitest Anlässe vor (Listen, Gäste, Preise). Kassieren und Einlassen gehören nicht zu deiner Rolle.",
+    blocks: [
+      { tab: "gl", h: "Listen und Gäste", kind: "steps", items: [
+        "Tab «Liste». GL gibt es immer. Weitere Listen mit «Liste anlegen», Preis optional (leer = gratis).",
+        "Gäste einzeln hinzufügen oder mit «Liste für diesen Anlass einfügen» ganze Listen einfügen: ein Name pro Zeile, zum Beispiel «Name +2; Von».",
+        "Bands oder Agenturen tragen ihre Gäste selbst ein: «Einladungslinks», Link erstellen, Personenzahl festlegen und weitergeben. Der Link wird nur einmal angezeigt."
+      ]},
+      { tab: "ev", h: "Anlass und Preise", kind: "steps", items: [
+        "Tab «Anlass». Anlass wählen und «Bearbeiten», oder «Neuen Anlass anlegen».",
+        "Bei «Preise» Kategorie und Preis eintragen. Die Kategorien selbst änderst du unten in der Karte «Preiskategorien».",
+        "Das Häkchen «Für Kasse, Garderobe und Beobachter sichtbar» setzen, wenn die Kasse den Anlass sehen soll.",
+        "Stock und Terminals trägt die Produktion ein."
+      ]},
+      { tab: null, h: "Gut zu wissen", kind: "tips", items: [
+        "Ein nicht freigegebener Anlass ist für Kasse, Garderobe und Beobachter unsichtbar. So kannst du in Ruhe vorbereiten.",
+        "Anlässe löschen kann die Produktion (ohne Buchungen) oder der Admin."
+      ]}
+    ]
+  },
+  beob: {
+    name: "Beobachter",
+    intro: "Du siehst, was an der Kasse läuft, und kannst die Listen einsehen. Ändern, kassieren oder einlassen kannst du nichts.",
+    blocks: [
+      { tab: "einlass", h: "Einlass ansehen", kind: "list", items: [
+        "Oben steht die Zahl der Eingelassenen, darunter die Summen bar und Karte.",
+        "«Letzte Buchungen» zeigt, was zuletzt gebucht wurde.",
+        "Die «Zählung nach Kategorie und Zeitraum» zeigt, wie viele Personen in einem Zeitraum eingelassen wurden."
+      ]},
+      { tab: "gl", h: "Liste ansehen", kind: "list", items: [
+        "Im Tab «Liste» siehst du die Gäste des Anlasses und wer schon eingelassen ist.",
+        "Mit «Name suchen» findest du eine Person schnell."
+      ]},
+      { tab: null, h: "Gut zu wissen", kind: "tips", items: [
+        "Die Anzeige aktualisiert sich selbst. Oben steht «Live», wenn die Verbindung steht.",
+        "Es gibt keine Knöpfe zum Kassieren, Stornieren oder Einlassen.",
+        "Der Anlass fehlt in der Auswahl: Er ist noch nicht freigegeben oder schon abgeschlossen."
+      ]}
+    ]
+  },
+  admin: {
+    name: "Admin",
+    intro: "Du kannst alles, was die Produktion kann, und zusätzlich Konten verwalten, die Mitgliederliste pflegen und abgeschlossene Anlässe wieder öffnen.",
+    blocks: [
+      { tab: "adm", h: "Neues Konto anlegen", kind: "steps", items: [
+        "In Supabase unter «Authentication», «Users» eine Person mit E-Mail und Passwort anlegen.",
+        "Die Person meldet sich in der App an und sieht «Konto noch nicht freigegeben».",
+        "Du öffnest den Tab «Admin», wählst die Rolle und setzt das Häkchen «freigegeben»."
+      ]},
+      { tab: "adm", h: "Rollen", kind: "list", items: [
+        "Kasse: kassiert und lässt ein.",
+        "Garderobe: erfasst die Marken.",
+        "Beobachter: sieht Einlass und Listen, ändert nichts.",
+        "Booking: bereitet Listen, Gäste und Preise vor.",
+        "Produktion: bereitet vor, kassiert, zählt, rechnet ab und schliesst Anlässe ab.",
+        "Admin: alles, dazu Konten, Mitgliederliste und Wiedereröffnen."
+      ]},
+      { tab: "gl", h: "Mitgliederliste", kind: "list", items: [
+        "Im Tab «Liste» ganz unten. Mitglieder einzeln hinzufügen oder einfügen (ein Name pro Zeile).",
+        "Die Liste gilt für alle Anlässe. Member werden an der Kasse über die Personensuche eingelassen."
+      ]},
+      { tab: "ab", h: "Anlass wieder öffnen", kind: "list", items: [
+        "Tab «Abschluss», bei einem abgeschlossenen Anlass «Anlass wieder öffnen».",
+        "Anlässe mit Buchungen kann nur der Admin löschen. Das nur im Ausnahmefall tun."
+      ]},
+      { tab: "ev", h: "Preiskategorien", kind: "list", items: [
+        "Im Tab «Anlass» unten in der Karte «Preiskategorien» (auch Booking und Produktion können sie ändern).",
+        "Wie die anderen Rollen arbeiten, siehst du in ihren Anleitungen: oben in der Anleitung die Rolle wählen."
+      ]}
+    ]
+  }
+};
+
 const verHtml=()=>'<p class="ver">EOS Version '+APP_VERSION+' · '+APP_DATE+'</p>';
 const PRICE_JACKE=2, PRICE_TASCHE=5;
 const ROLES={kasse:'Kasse',gard:'Garderobe',booking:'Booking',prod:'Produktion',admin:'Admin',beob:'Beobachter'};
@@ -1030,6 +1204,7 @@ function statusHtml(ad){
 function topbar(){
   const opts=S.events.map(ev=>'<option value="'+ev.id+'"'+(ev.id===curId?' selected':'')+'>'+esc((ev.name||'ohne Namen')+' · '+dmy(ev.date).slice(0,5))+'</option>').join('');
   return '<div class="topbar"><label class="evsel"><span>Anlass (an der Kasse einkassieren für)</span><select id="evSel">'+opts+'</select></label>'+
+    '<button class="rolebtn helpbtn" data-act="help" aria-label="Anleitung">?</button>'+
     '<button class="rolebtn" data-act="role" aria-label="Konto, angemeldet als '+ROLES[role]+'">'+ROLES[role]+'</button></div>'+
     '<div class="statline" id="stat">'+statHtml()+'</div>';
 }
@@ -1648,7 +1823,28 @@ function openAccount(){
   sheet.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="Konto"><h2>Konto</h2>'+
     '<p><b>'+esc((profile&&profile.display_name)||(me&&me.email)||'')+'</b><br><span class="hint">'+esc((me&&me.email)||'')+' · Rolle '+ROLES[role]+'</span></p>'+
     '<p class="hint">Version '+APP_VERSION+' vom '+APP_DATE+'<br>Server: '+esc((cfg().url||'').replace(/^https?:\/\//,''))+'<br>Gerät: '+esc(DEVICE)+'</p>'+
+    '<div class="btns"><button class="ghost" data-sh="help">Anleitung</button></div>'+
     '<div class="btns"><button class="ghost" data-sh="logout">Abmelden</button><button class="ghost" data-sh="cancel">Schliessen</button></div></div>';
+  sheet.hidden=false;
+}
+const HELP_KEY={kasse:'kasse',gard:'gard',booking:'booking',prod:'prod',admin:'admin',beob:'beob'};
+function helpHtml(rk){
+  const hp=HELP[rk]||HELP[HELP_KEY[role]]; if(!hp) return '';
+  const hasTab=hp.blocks.some(b=>b.tab===tab);
+  const blocks=hp.blocks.map((b,i)=>{
+    const open=hasTab?(b.tab===tab):(i===0);
+    const li=b.items.map(x=>'<li>'+esc(x)+'</li>').join('');
+    return '<details class="helpblk'+(b.kind==='tips'?' tip':'')+'"'+(open?' open':'')+'><summary>'+esc(b.h)+'</summary>'+(b.kind==='steps'?'<ol>'+li+'</ol>':'<ul>'+li+'</ul>')+'</details>';
+  }).join('');
+  return blocks;
+}
+function openHelp(rk){
+  rk=rk||HELP_KEY[role]; const hp=HELP[rk]; if(!hp) return;
+  const sel=isProd()?'<label class="f" style="margin:0 0 10px"><span>Anleitung für die Rolle</span><select id="helpRole">'+Object.keys(HELP).map(k=>'<option value="'+k+'"'+(k===rk?' selected':'')+'>'+esc(HELP[k].name)+'</option>').join('')+'</select></label>':'';
+  sheet.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="Anleitung"><h2>Anleitung: '+esc(hp.name)+'</h2>'+sel+
+    '<p class="hint">'+esc(hp.intro)+'</p>'+helpHtml(rk)+
+    '<p class="hint" style="margin:10px 0 0">EOS Version '+APP_VERSION+' · '+APP_DATE+'</p>'+
+    '<div class="btns"><button class="primary" data-sh="done">Schliessen</button></div></div>';
   sheet.hidden=false;
 }
 function openOutbox(){
@@ -1684,6 +1880,7 @@ sheet.addEventListener('click',e=>{
   if(b.dataset.sh==='copylink'){ if(lastLink) copyText(lastLink.url); return; }
   if(b.dataset.sh==='sharelink'){ if(lastLink&&navigator.share) navigator.share({title:'Gästeliste eintragen',text:'Hier kannst du deine Gäste auf die Gästeliste setzen:',url:lastLink.url}).catch(()=>{}); return; }
   if(b.dataset.sh==='logout'){ closeSheet(); doLogout(); return; }
+  if(b.dataset.sh==='help'){ openHelp(); return; }
   if(b.dataset.sh==='ok'){
     const cat=findCat(b.dataset.id), q=num($('#shQty').value), am=num($('#shAmt').value);
     if(q==null||q<1||!Number.isInteger(q)){ $('#shErr').textContent='Anzahl als ganze Zahl eintragen.'; return; }
@@ -1691,7 +1888,7 @@ sheet.addEventListener('click',e=>{
     closeSheet(); cartAddCustom(cat,q,round2(am));
   }
 });
-sheet.addEventListener('input',e=>{ if(e.target.id==='sq'&&search){ search.q=e.target.value; $('#sl').innerHTML=searchList(); } });
+sheet.addEventListener('input',e=>{ if(e.target.id==='helpRole'){ openHelp(e.target.value); return; } if(e.target.id==='sq'&&search){ search.q=e.target.value; $('#sl').innerHTML=searchList(); } });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!sheet.hidden) closeSheet(); });
 
 /* ---------- Ereignisse ---------- */
@@ -1746,7 +1943,7 @@ $('#app').addEventListener('click', async e => {
   if (d.act === 'recheck') return start();
   if (d.act === 'logout') return doLogout();
   if (boot !== 'ready') return;
-  if (isObs() && !(d.act === 'role' || d.act === 'outbox' || d.range !== undefined)) return denied();
+  if (isObs() && !(d.act === 'role' || d.act === 'help' || d.act === 'outbox' || d.range !== undefined)) return denied();
 
   if (d.cat) { const c = findCat(d.cat); if (c) cartAdd(c); }
   else if (d.storno) {
@@ -1792,6 +1989,7 @@ $('#app').addEventListener('click', async e => {
     deleteRows('event_prices', sb.from('event_prices').delete().match({ event_id: curId, category_id: row.category_id }).select(), row);
   }
   else if (d.act === 'role') { openAccount(); }
+  else if (d.act === 'help') { openHelp(); }
   else if (d.act === 'outbox') { openOutbox(); }
   else if (d.act === 'copy') { copyText(summaryText()); }
   else if (d.act === 'addterm') {
